@@ -6,8 +6,9 @@ services:
     container_name: improvbyexample-postgres
     environment:
       POSTGRES_DB: improvbyexample
-      POSTGRES_USER: postgres
+      POSTGRES_USER: improvuser
       POSTGRES_PASSWORD: password
+      POSTGRES_INITDB_ARGS: "--auth-host=scram-sha-256"
     ports:
       - "5432:5432"
     volumes:
@@ -15,7 +16,7 @@ services:
     networks:
       - improvbyexample-network
     healthcheck:
-      test: ["CMD-SHELL", "pg_isready -U postgres"]
+      test: ["CMD-SHELL", "pg_isready -U improvuser"]
       interval: 30s
       timeout: 10s
       retries: 5
