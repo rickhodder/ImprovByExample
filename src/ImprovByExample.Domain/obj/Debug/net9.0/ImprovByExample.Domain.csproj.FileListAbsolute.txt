@@ -1,0 +1,11 @@
+D:\GitHub\ImprovByExample\src\ImprovByExample.Domain\bin\Debug\net9.0\ImprovByExample.Domain.deps.json
+D:\GitHub\ImprovByExample\src\ImprovByExample.Domain\bin\Debug\net9.0\ImprovByExample.Domain.dll
+D:\GitHub\ImprovByExample\src\ImprovByExample.Domain\bin\Debug\net9.0\ImprovByExample.Domain.pdb
+D:\GitHub\ImprovByExample\src\ImprovByExample.Domain\obj\Debug\net9.0\ImprovByExample.Domain.GeneratedMSBuildEditorConfig.editorconfig
+D:\GitHub\ImprovByExample\src\ImprovByExample.Domain\obj\Debug\net9.0\ImprovByExample.Domain.AssemblyInfoInputs.cache
+D:\GitHub\ImprovByExample\src\ImprovByExample.Domain\obj\Debug\net9.0\ImprovByExample.Domain.AssemblyInfo.cs
+D:\GitHub\ImprovByExample\src\ImprovByExample.Domain\obj\Debug\net9.0\ImprovByExample.Domain.csproj.CoreCompileInputs.cache
+D:\GitHub\ImprovByExample\src\ImprovByExample.Domain\obj\Debug\net9.0\ImprovByExample.Domain.dll
+D:\GitHub\ImprovByExample\src\ImprovByExample.Domain\obj\Debug\net9.0\refint\ImprovByExample.Domain.dll
+D:\GitHub\ImprovByExample\src\ImprovByExample.Domain\obj\Debug\net9.0\ImprovByExample.Domain.pdb
+D:\GitHub\ImprovByExample\src\ImprovByExample.Domain\obj\Debug\net9.0\ref\ImprovByExample.Domain.dll

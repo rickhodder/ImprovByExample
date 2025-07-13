@@ -1,0 +1,11 @@
+{
+  "version": 2,
+  "dgSpecHash": "bx8q3vAbK1w=",
+  "success": true,
+  "projectFilePath": "D:\\GitHub\\ImprovByExample\\src\\ImprovByExample.Api\\ImprovByExample.Api.csproj",
+  "expectedPackageFiles": [
+    "C:\\Users\\rickh\\.nuget\\packages\\microsoft.aspnetcore.openapi\\9.0.6\\microsoft.aspnetcore.openapi.9.0.6.nupkg.sha512",
+    "C:\\Users\\rickh\\.nuget\\packages\\microsoft.openapi\\1.6.17\\microsoft.openapi.1.6.17.nupkg.sha512"
+  ],
+  "logs": []
+}

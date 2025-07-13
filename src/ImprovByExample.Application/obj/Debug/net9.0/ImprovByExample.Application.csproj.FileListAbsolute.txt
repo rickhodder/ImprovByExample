@@ -1,0 +1,15 @@
+D:\GitHub\ImprovByExample\src\ImprovByExample.Application\bin\Debug\net9.0\ImprovByExample.Application.deps.json
+D:\GitHub\ImprovByExample\src\ImprovByExample.Application\bin\Debug\net9.0\ImprovByExample.Application.dll
+D:\GitHub\ImprovByExample\src\ImprovByExample.Application\bin\Debug\net9.0\ImprovByExample.Application.pdb
+D:\GitHub\ImprovByExample\src\ImprovByExample.Application\bin\Debug\net9.0\ImprovByExample.Domain.dll
+D:\GitHub\ImprovByExample\src\ImprovByExample.Application\bin\Debug\net9.0\ImprovByExample.Domain.pdb
+D:\GitHub\ImprovByExample\src\ImprovByExample.Application\obj\Debug\net9.0\ImprovByExample.Application.csproj.AssemblyReference.cache
+D:\GitHub\ImprovByExample\src\ImprovByExample.Application\obj\Debug\net9.0\ImprovByExample.Application.GeneratedMSBuildEditorConfig.editorconfig
+D:\GitHub\ImprovByExample\src\ImprovByExample.Application\obj\Debug\net9.0\ImprovByExample.Application.AssemblyInfoInputs.cache
+D:\GitHub\ImprovByExample\src\ImprovByExample.Application\obj\Debug\net9.0\ImprovByExample.Application.AssemblyInfo.cs
+D:\GitHub\ImprovByExample\src\ImprovByExample.Application\obj\Debug\net9.0\ImprovByExample.Application.csproj.CoreCompileInputs.cache
+D:\GitHub\ImprovByExample\src\ImprovByExample.Application\obj\Debug\net9.0\ImprovBy.43E14C76.Up2Date
+D:\GitHub\ImprovByExample\src\ImprovByExample.Application\obj\Debug\net9.0\ImprovByExample.Application.dll
+D:\GitHub\ImprovByExample\src\ImprovByExample.Application\obj\Debug\net9.0\refint\ImprovByExample.Application.dll
+D:\GitHub\ImprovByExample\src\ImprovByExample.Application\obj\Debug\net9.0\ImprovByExample.Application.pdb
+D:\GitHub\ImprovByExample\src\ImprovByExample.Application\obj\Debug\net9.0\ref\ImprovByExample.Application.dll

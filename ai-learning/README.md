@@ -19,6 +19,7 @@ Response files follow: `YYYY-MM-DD-topic-description.md`
 - Document effective prompts and techniques
 - Build a knowledge base for future reference
 - Share insights with other developers
+- more here 
 
 ## Categories
 
