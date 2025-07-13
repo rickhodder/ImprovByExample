@@ -1,0 +1,49 @@
+name: Deploy to AWS ECS
+
+on:
+  push:
+    branches:
+      - main
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v2
+
+      - name: Set up .NET
+        uses: actions/setup-dotnet@v1
+        with:
+          dotnet-version: '6.0.x'
+
+      - name: Restore dependencies
+        run: dotnet restore ImprovByExample.sln
+
+      - name: Build
+        run: dotnet build ImprovByExample.sln --configuration Release --no-restore
+
+      - name: Publish
+        run: dotnet publish ImprovByExample.sln --configuration Release --output ./publish
+
+      - name: Login to Amazon ECR
+        uses: aws-actions/amazon-ecr-login@v1
+
+      - name: Build Docker image
+        run: |
+          docker build -t improvbyexample ./docker
+          docker tag improvbyexample:latest <your_ecr_repository_uri>:latest
+
+      - name: Push Docker image
+        run: |
+          docker push <your_ecr_repository_uri>:latest
+
+      - name: Deploy to AWS ECS
+        uses: aws-actions/ecs-deploy@v1
+        with:
+          cluster: <your_ecs_cluster_name>
+          service: <your_ecs_service_name>
+          task-definition: <your_task_definition>
+          wait-for-service-stability: true
+          region: <your_aws_region>

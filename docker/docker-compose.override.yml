@@ -1,0 +1,38 @@
+version: '3.8'
+
+services:
+  postgres:
+    ports:
+      - "5432:5432"
+    environment:
+      POSTGRES_DB: improvbyexample_dev
+      POSTGRES_USER: dev_user
+      POSTGRES_PASSWORD: dev_password
+    volumes:
+      - postgres_dev_data:/var/lib/postgresql/data
+      - ./init-scripts:/docker-entrypoint-initdb.d
+
+  redis:
+    ports:
+      - "6379:6379"
+    command: redis-server --appendonly yes --notify-keyspace-events Ex
+
+  # pgAdmin for database management
+  pgadmin:
+    image: dpage/pgadmin4:latest
+    container_name: improvbyexample-pgadmin
+    environment:
+      PGADMIN_DEFAULT_EMAIL: admin@improvbyexample.com
+      PGADMIN_DEFAULT_PASSWORD: admin
+    ports:
+      - "5050:80"
+    depends_on:
+      - postgres
+    networks:
+      - improvbyexample-network
+    volumes:
+      - pgadmin_data:/var/lib/pgadmin
+
+volumes:
+  postgres_dev_data:
+  pgadmin_data:
