@@ -1628,16 +1628,18 @@ These are detailed technical implementation phases for building the foundation (
    - `[AllowAnonymous]` on GET endpoints
    - `[Authorize(Roles = "Admin")]` on POST/PUT/DELETE
 8. Implement pagination with PagedResult<T>
-9. Add Swagger/OpenAPI documentation
-10. Write integration tests for API endpoints
-11. Test anonymous and authenticated access
+9. Install Scalar.AspNetCore for API documentation
+10. Configure OpenAPI metadata and Scalar UI endpoint (/scalar/v1)
+11. Add XML documentation comments to controllers
+12. Write integration tests for API endpoints
+13. Test anonymous and authenticated access
 
 **Deliverables:**
 - ActivitiesController with full CRUD
 - DTOs and validators
 - Anonymous read, admin write authorization
 - API integration tests
-- Swagger documentation
+- Scalar API documentation UI
 
 **Success Criteria:**
 - API endpoints work correctly
@@ -1648,33 +1650,31 @@ These are detailed technical implementation phases for building the foundation (
 
 ---
 
-### MVP Phase 7: Logging & Observability ⬜ NOT STARTED
+### MVP Phase 7: Structured Logging ⬜ NOT STARTED
 **Status:** ⬜ Not Started  
-**Goal:** Add structured logging and API documentation
+**Goal:** Add structured logging with Serilog
 
 **Steps:**
 1. Install Serilog packages (AspNetCore, Console, File, Seq sinks)
 2. Configure Serilog in Program.cs
 3. Add enrichers (Environment, Thread, Machine)
 4. Configure log levels per namespace
-5. Test logging output to console and file
-6. Install Scalar.AspNetCore for API documentation
-7. Configure OpenAPI metadata (title, version, description)
-8. Add XML documentation comments to controllers
-9. Set up Scalar UI endpoint (/scalar/v1)
-10. Test Scalar documentation UI
+5. Add structured logging throughout application layers
+6. Test logging output to console and file
+7. Optional: Set up Seq container for log aggregation
+8. Write tests that verify logging behavior
 
 **Deliverables:**
 - Serilog configured with multiple sinks
 - Structured logging throughout application
-- Scalar API documentation UI
-- XML documentation on API endpoints
+- Log enrichers configured
+- Logging tests
 
 **Success Criteria:**
-- Logs appear in console and file
-- Structured data captured in logs
-- Scalar UI displays API documentation
-- Can test API endpoints from Scalar
+- Logs appear in console and file with proper structure
+- Enriched data captured in logs (environment, thread, etc.)
+- Log levels configured appropriately per namespace
+- Can filter and search logs effectively
 
 ---
 
