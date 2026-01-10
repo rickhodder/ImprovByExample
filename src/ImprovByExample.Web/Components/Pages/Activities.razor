@@ -1,0 +1,129 @@
+@page "/activities"
+@inject IHttpClientFactory HttpClientFactory
+
+<PageTitle>Browse Activities - Improv By Example</PageTitle>
+
+<MudText Typo="Typo.h3" GutterBottom="true">Browse Activities</MudText>
+
+<MudPaper Class="pa-4 mb-4">
+    <MudTextField @bind-Value="_searchTerm" Label="Search" Variant="Variant.Outlined" Adornment="Adornment.Start" 
+                  AdornmentIcon="@Icons.Material.Filled.Search" OnKeyUp="HandleSearch" Immediate="true" />
+</MudPaper>
+
+@if (_loading)
+{
+    <MudProgressLinear Color="Color.Primary" Indeterminate="true" />
+}
+else if (_activities == null || !_activities.Any())
+{
+    <MudAlert Severity="Severity.Info">No activities found. Try adjusting your search.</MudAlert>
+}
+else
+{
+    <MudGrid>
+        @foreach (var activity in _activities)
+        {
+            <MudItem xs="12" sm="6" md="4">
+                <MudCard Elevation="4">
+                    <MudCardHeader>
+                        <CardHeaderContent>
+                            <MudText Typo="Typo.h6">@activity.Name</MudText>
+                            <MudChip T="string" Size="Size.Small" Color="Color.Primary">@activity.ActivityType</MudChip>
+                        </CardHeaderContent>
+                    </MudCardHeader>
+                    <MudCardContent>
+                        <MudText Typo="Typo.body2">@TruncateDescription(activity.Description)</MudText>
+                        @if (!string.IsNullOrEmpty(activity.Difficulty))
+                        {
+                            <MudChip T="string" Size="Size.Small" Class="mt-2">@activity.Difficulty</MudChip>
+                        }
+                        @if (activity.MinPlayers.HasValue || activity.MaxPlayers.HasValue)
+                        {
+                            <MudText Typo="Typo.caption" Class="mt-2">
+                                Players: @GetPlayerRange(activity.MinPlayers, activity.MaxPlayers)
+                            </MudText>
+                        }
+                    </MudCardContent>
+                    <MudCardActions>
+                        <MudButton Variant="Variant.Text" Color="Color.Primary" Href="@($"/activities/{activity.Id}")">View Details</MudButton>
+                    </MudCardActions>
+                </MudCard>
+            </MudItem>
+        }
+    </MudGrid>
+}
+
+@code {
+    private List<ActivityDto>? _activities;
+    private string _searchTerm = string.Empty;
+    private bool _loading = true;
+
+    protected override async Task OnInitializedAsync()
+    {
+        await LoadActivities();
+    }
+
+    private async Task LoadActivities()
+    {
+        _loading = true;
+        try
+        {
+            var client = HttpClientFactory.CreateClient("ImprovAPI");
+            var response = await client.GetFromJsonAsync<PagedResult<ActivityDto>>($"/api/activities?searchTerm={_searchTerm}");
+            _activities = response?.Items ?? new List<ActivityDto>();
+        }
+        catch (Exception ex)
+        {
+            // Log error - Snackbar not available in MudBlazor 8
+            Console.WriteLine($"Error loading activities: {ex.Message}");
+            _activities = new List<ActivityDto>();
+        }
+        finally
+        {
+            _loading = false;
+        }
+    }
+
+    private async Task HandleSearch(KeyboardEventArgs args)
+    {
+        if (args.Key == "Enter")
+        {
+            await LoadActivities();
+        }
+    }
+
+    private string TruncateDescription(string description, int maxLength = 100)
+    {
+        if (string.IsNullOrEmpty(description) || description.Length <= maxLength)
+            return description;
+        return description.Substring(0, maxLength) + "...";
+    }
+
+    private string GetPlayerRange(int? min, int? max)
+    {
+        if (min.HasValue && max.HasValue)
+            return $"{min}-{max}";
+        if (min.HasValue)
+            return $"{min}+";
+        if (max.HasValue)
+            return $"Up to {max}";
+        return "Any";
+    }
+
+    public class ActivityDto
+    {
+        public int Id { get; set; }
+        public string Name { get; set; } = string.Empty;
+        public string ActivityType { get; set; } = string.Empty;
+        public string Description { get; set; } = string.Empty;
+        public string? Difficulty { get; set; }
+        public int? MinPlayers { get; set; }
+        public int? MaxPlayers { get; set; }
+    }
+
+    public class PagedResult<T>
+    {
+        public List<T> Items { get; set; } = new();
+        public int TotalCount { get; set; }
+    }
+}
