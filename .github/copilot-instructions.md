@@ -11,3 +11,4 @@
 - Use established patterns in the codebase
 - Write tests for new functionality
 - Keep responses concise and focused
+- Keep PRDs updated as changes are implemented
