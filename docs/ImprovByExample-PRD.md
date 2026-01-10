@@ -23,12 +23,17 @@
 ### Implementation
 - [8. Deployment & Containerization](#8-deployment--containerization) - Docker, CI/CD, deployment options
 - [9. Development Phases](#9-development-phases) - **Start Here!** Phase-by-phase roadmap
-  - [Phase 1: Foundation (MVP)](#phase-1-foundation-mvp) - **Your starting point (with tests!)**
-  - [Phase 2: External References](#phase-2-external-references--activity-relationships)
-  - [Phase 3: AI Video Generation](#phase-3-ai-video-generation)
-  - [Phase 4: Show Planner](#phase-4-show-planner)
-  - [Phase 5: Polish & Launch](#phase-5-polish--launch)
-  - [Phase 6: Commerce (Future)](#phase-6-commerce-features-future)
+  - [9.1 MVP Implementation Phases](#91-mvp-implementation-phases) - Detailed technical setup steps
+    - [MVP Phase 1: Blazor App Foundation](#mvp-phase-1-blazor-app-foundation)
+    - [MVP Phase 2-10: Infrastructure & Features](#mvp-phase-2-clean-architecture--domain-layer)
+  - [9.2 Feature Phases](#92-feature-phases) - Major functionality milestones
+    - [Phase 1: Foundation (MVP)](#phase-1-foundation-mvp) - ✅ COMPLETE
+    - [Phase 2: External References](#phase-2-external-references--activity-relationships) - 🚧 IN PROGRESS
+    - [Phase 3: AI Video Generation](#phase-3-ai-video-generation)
+    - [Phase 4: Show Planner](#phase-4-show-planner)
+    - [Phase 5: Polish & Launch](#phase-5-polish--launch)
+    - [Phase 6: Commerce (Future)](#phase-6-commerce-features-future)
+    - [Phase 7: Marketing Automation (Future)](#phase-7-marketing-automation-future)
 
 ### Future Planning
 - [10. Future Enhancements](#10-future-enhancements) - Features for later phases
@@ -1400,7 +1405,15 @@ jobs:
 
 ## 9. Development Phases
 
-### Phase 1: Blazor App Foundation
+This section covers both the **MVP Implementation Phases** (detailed step-by-step foundation setup) and the **Feature Phases** (major functionality milestones).
+
+---
+
+## 9.1 MVP Implementation Phases
+
+These are detailed technical implementation phases for building the foundation (MVP). Each phase builds upon the previous one.
+
+### MVP Phase 1: Blazor App Foundation
 **Goal:** Create a working Blazor Web App with MudBlazor UI that runs successfully
 
 **Steps:**
@@ -1437,7 +1450,7 @@ jobs:
 
 ---
 
-### Phase 2: Clean Architecture & Domain Layer
+### MVP Phase 2: Clean Architecture & Domain Layer
 **Goal:** Add Clean Architecture structure and domain models
 
 **Steps:**
@@ -1475,7 +1488,7 @@ jobs:
 
 ---
 
-### Phase 3: Database & EF Core Setup
+### MVP Phase 3: Database & EF Core Setup
 **Goal:** Set up PostgreSQL database with Entity Framework Core
 
 **Steps:**
@@ -1509,7 +1522,7 @@ jobs:
 
 ---
 
-### Phase 4: Repository Pattern & Specifications
+### MVP Phase 4: Repository Pattern & Specifications
 **Goal:** Implement Repository Pattern with Ardalis.Specification
 
 **Steps:**
@@ -1538,7 +1551,7 @@ jobs:
 
 ---
 
-### Phase 5: Identity & Authentication
+### MVP Phase 5: Identity & Authentication
 **Goal:** Add ASP.NET Core Identity with roles and authorization
 
 **Steps:**
@@ -1569,7 +1582,7 @@ jobs:
 
 ---
 
-### Phase 6: API Layer with Authorization
+### MVP Phase 6: API Layer with Authorization
 **Goal:** Create REST API with role-based authorization
 
 **Steps:**
@@ -1603,7 +1616,7 @@ jobs:
 
 ---
 
-### Phase 7: Logging & Observability
+### MVP Phase 7: Logging & Observability
 **Goal:** Add structured logging and API documentation
 
 **Steps:**
@@ -1632,7 +1645,7 @@ jobs:
 
 ---
 
-### Phase 8: Blazor UI Pages
+### MVP Phase 8: Blazor UI Pages
 **Goal:** Build Blazor pages for browsing and managing activities
 
 **Steps:**
@@ -1668,7 +1681,7 @@ jobs:
 
 ---
 
-### Phase 9: Data Seeding & Testing
+### MVP Phase 9: Data Seeding & Testing
 **Goal:** Seed initial data and complete testing
 
 **Steps:**
@@ -1698,7 +1711,7 @@ jobs:
 
 ---
 
-### Phase 10: Deployment & CI/CD (Optional for MVP)
+### MVP Phase 10: Deployment & CI/CD (Optional for MVP)
 **Goal:** Containerize and deploy the application
 
 **Steps:**
@@ -1728,9 +1741,77 @@ jobs:
 
 ---
 
-## Phases 1-9 Status - Ready to Begin
+## 9.2 Feature Phases
 
-### ⏸️ Phase 1: Blazor App Foundation - NOT STARTED
+These are the major feature milestone phases for building out the product functionality.
+
+---
+
+### Phase 1: Foundation (MVP)
+**Status:** ✅ COMPLETE
+
+This phase establishes the foundation with:
+- Blazor Web App with MudBlazor UI
+- Clean Architecture structure
+- PostgreSQL database with Entity Framework Core
+- Repository pattern with Ardalis.Specification
+- ASP.NET Core Identity with roles
+- Initial data seeding
+
+See **MVP Implementation Phases 1-9** above for detailed steps.
+
+---
+
+### Phase 2: External References & Activity Relationships
+**Status:** 🚧 IN PROGRESS
+
+**Goal:** Add support for external video references and activity relationships to enrich the activity database.
+
+**Features:**
+- External video reference management (CRUD)
+  - Support for YouTube, Vimeo, and other video platforms
+  - Video descriptions explaining how they demonstrate activities
+  - Admin interface for adding/editing video references
+  
+- Video timestamp functionality
+  - Add timestamps to videos marking specific moments
+  - Label and describe each timestamp
+  - Clickable timestamps that jump to specific moments in videos
+  
+- Activity relationship management
+  - Link activities as Aliases (same activity, different name)
+  - Link activities as Variations (modified versions)
+  - Link activities as Similar (related activities)
+  - Bidirectional relationship display
+  - Admin interface for creating and managing relationships
+  
+- User interface enhancements
+  - Display external video references on activity detail pages
+  - YouTube/Vimeo embed integration with timestamp support
+  - Related activities section showing aliases, variations, and similar activities
+  - Click-through navigation between related activities
+
+**Implementation Steps:**
+1. Create API endpoints for ExternalVideoReference CRUD operations
+2. Create API endpoints for ActivityRelationship CRUD operations  
+3. Add FluentValidation validators for video references and relationships
+4. Build Blazor UI components for managing video references
+5. Build Blazor UI for managing activity relationships
+6. Implement YouTube/Vimeo embed components with timestamp support
+7. Add related activities display to activity detail page
+8. Write unit and integration tests
+
+**Success Criteria:**
+- Admins can add external video references with timestamps to activities
+- Users can click timestamps to jump to specific moments in videos
+- Admins can link activities together with relationship types
+- Users can browse related activities and navigate between them
+- All CRUD operations have appropriate authorization
+- Tests pass with good coverage
+
+---
+
+### Phase 3: AI Video Generation
 - ⬜ Working Blazor Web App template created
 - ⬜ MudBlazor 8.0.0 integrated and configured
 - ⬜ App.razor with proper render modes (`@rendermode="@RenderMode.InteractiveServer"`)
@@ -1820,7 +1901,7 @@ jobs:
 
 ---
 
-### Phase 10: Deployment & CI/CD
+### MVP Phase 10: Deployment & CI/CD
 **Goal:** Containerize and deploy the application (Optional for MVP)
 
 **Deliverables:**
@@ -1833,18 +1914,7 @@ jobs:
 
 ---
 
-### Phase 11: External References & Activity Relationships
-- External video reference management (CRUD)
-- **Tests for video reference CRUD operations**
-- Video timestamp functionality
-- YouTube/Vimeo embed integration
-- Timestamp-based deep linking
-- Activity relationship management (aliases, variations, similar)
-- **Tests for relationship logic and constraints**
-- Related activities display on activity detail pages
-- **E2E tests for video reference workflow**
-
-### Phase 12: AI Video Generation
+### Phase 3: AI Video Generation
 - Background service implementation
 - **Unit tests for background service logic**
 - SignalR hub configuration
@@ -1861,7 +1931,7 @@ jobs:
 - **E2E tests for video generation workflow**
 - **Load tests for concurrent video generation**
 
-### Phase 13: Show Planner
+### Phase 4: Show Planner
 - Show planner data model
 - **Unit tests for data model validation**
 - Player assignment logic
@@ -1874,7 +1944,7 @@ jobs:
 - **E2E tests for show planning workflow**
 - **Tests for constraint validation (player wait times, etc.)**
 
-### Phase 14: Polish & Launch
+### Phase 5: Polish & Launch
 - UI/UX improvements
 - Performance optimization
 - **Performance tests and benchmarks**
@@ -1889,7 +1959,7 @@ jobs:
 - Monitoring and alerting setup
 - **Synthetic monitoring and health checks**
 
-### Phase 15: Commerce Features (Future)
+### Phase 6: Commerce Features (Future)
 - Class management and booking system
 - Industrial/event booking system
 - Payment processing integration
@@ -1897,7 +1967,7 @@ jobs:
 - Customer relationship management
 - Booking confirmations and reminders
 
-### Phase 16: Marketing Automation (Future)
+### Phase 7: Marketing Automation (Future)
 - Social media platform integrations (APIs)
 - Content scheduling system
 - Duplicate tracking database
