@@ -19,17 +19,20 @@ public class ActivitiesController : ControllerBase
     private readonly IValidator<CreateActivityDto> _createValidator;
     private readonly IValidator<UpdateActivityDto> _updateValidator;
     private readonly IValidator<ActivityFilterDto> _filterValidator;
+    private readonly ILogger<ActivitiesController> _logger;
 
     public ActivitiesController(
         IActivityService activityService,
         IValidator<CreateActivityDto> createValidator,
         IValidator<UpdateActivityDto> updateValidator,
-        IValidator<ActivityFilterDto> filterValidator)
+        IValidator<ActivityFilterDto> filterValidator,
+        ILogger<ActivitiesController> logger)
     {
         _activityService = activityService;
         _createValidator = createValidator;
         _updateValidator = updateValidator;
         _filterValidator = filterValidator;
+        _logger = logger;
     }
 
     /// <summary>
@@ -49,6 +52,8 @@ public class ActivitiesController : ControllerBase
         var validationResult = await _filterValidator.ValidateAsync(filter, cancellationToken);
         if (!validationResult.IsValid)
         {
+            _logger.LogWarning("Invalid filter provided for GetActivities: {Errors}", 
+                string.Join(", ", validationResult.Errors.Select(e => e.ErrorMessage)));
             return BadRequest(validationResult.Errors);
         }
 
@@ -97,12 +102,15 @@ public class ActivitiesController : ControllerBase
         var validationResult = await _createValidator.ValidateAsync(dto, cancellationToken);
         if (!validationResult.IsValid)
         {
+            _logger.LogWarning("Invalid data provided for CreateActivity: {Errors}", 
+                string.Join(", ", validationResult.Errors.Select(e => e.ErrorMessage)));
             return BadRequest(validationResult.Errors);
         }
 
         var userId = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
         if (string.IsNullOrEmpty(userId))
         {
+            _logger.LogWarning("CreateActivity called without valid user ID");
             return Unauthorized(new { message = "User authentication failed." });
         }
 
@@ -135,18 +143,22 @@ public class ActivitiesController : ControllerBase
     {
         if (id != dto.Id)
         {
+            _logger.LogWarning("UpdateActivity: ID mismatch - URL: {UrlId}, Body: {BodyId}", id, dto.Id);
             return BadRequest(new { message = "ID in URL does not match ID in body." });
         }
 
         var validationResult = await _updateValidator.ValidateAsync(dto, cancellationToken);
         if (!validationResult.IsValid)
         {
+            _logger.LogWarning("Invalid data provided for UpdateActivity {ActivityId}: {Errors}", id,
+                string.Join(", ", validationResult.Errors.Select(e => e.ErrorMessage)));
             return BadRequest(validationResult.Errors);
         }
 
         var userId = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
         if (string.IsNullOrEmpty(userId))
         {
+            _logger.LogWarning("UpdateActivity called without valid user ID");
             return Unauthorized(new { message = "User authentication failed." });
         }
 

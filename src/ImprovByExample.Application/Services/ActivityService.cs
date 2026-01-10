@@ -4,6 +4,7 @@ using ImprovByExample.Application.Common.Models.DTOs;
 using ImprovByExample.Application.Common.Models.Responses;
 using ImprovByExample.Application.Specifications;
 using ImprovByExample.Domain.Entities;
+using Microsoft.Extensions.Logging;
 
 namespace ImprovByExample.Application.Services;
 
@@ -11,25 +12,33 @@ public class ActivityService : IActivityService
 {
     private readonly IReadRepository<ImprovActivity> _readRepository;
     private readonly IRepository<ImprovActivity> _repository;
+    private readonly ILogger<ActivityService> _logger;
 
     public ActivityService(
         IReadRepository<ImprovActivity> readRepository,
-        IRepository<ImprovActivity> repository)
+        IRepository<ImprovActivity> repository,
+        ILogger<ActivityService> logger)
     {
         _readRepository = readRepository;
         _repository = repository;
+        _logger = logger;
     }
 
     public async Task<PagedResult<ActivityDto>> GetActivitiesAsync(
         ActivityFilterDto filter, 
         CancellationToken cancellationToken = default)
     {
+        _logger.LogDebug("Getting activities with filter: SearchTerm={SearchTerm}, ActivityTypeId={ActivityTypeId}, PageNumber={PageNumber}, PageSize={PageSize}",
+            filter.SearchTerm, filter.ActivityTypeId, filter.PageNumber, filter.PageSize);
+
         var spec = new ActivitiesFilterSpec(filter);
         var activities = await _readRepository.ListAsync(spec, cancellationToken);
         
         // Get total count for pagination using a separate count specification
         var countSpec = new ActivitiesCountSpec(filter);
         var totalCount = await _readRepository.CountAsync(countSpec, cancellationToken);
+
+        _logger.LogInformation("Retrieved {Count} activities (Total: {TotalCount})", activities.Count, totalCount);
 
         return new PagedResult<ActivityDto>
         {
@@ -42,8 +51,19 @@ public class ActivityService : IActivityService
 
     public async Task<ActivityDto?> GetActivityByIdAsync(int id, CancellationToken cancellationToken = default)
     {
+        _logger.LogDebug("Getting activity by ID: {ActivityId}", id);
+        
         var spec = new ActivityByIdSpec(id);
         var activity = await _readRepository.FirstOrDefaultAsync(spec, cancellationToken);
+        
+        if (activity == null)
+        {
+            _logger.LogWarning("Activity with ID {ActivityId} not found", id);
+        }
+        else
+        {
+            _logger.LogInformation("Retrieved activity: {ActivityId} - {ActivityName}", id, activity.Name);
+        }
         
         return activity == null ? null : MapToDto(activity);
     }
@@ -53,6 +73,8 @@ public class ActivityService : IActivityService
         string createdById, 
         CancellationToken cancellationToken = default)
     {
+        _logger.LogInformation("Creating new activity: {ActivityName} by user {UserId}", dto.Name, createdById);
+        
         var activity = new ImprovActivity
         {
             Name = dto.Name,
@@ -75,6 +97,8 @@ public class ActivityService : IActivityService
         var created = await _repository.AddAsync(activity, cancellationToken);
         await _repository.SaveChangesAsync(cancellationToken);
 
+        _logger.LogInformation("Successfully created activity: {ActivityId} - {ActivityName}", created.Id, created.Name);
+
         // Reload with includes
         return (await GetActivityByIdAsync(created.Id, cancellationToken))!;
     }
@@ -84,9 +108,14 @@ public class ActivityService : IActivityService
         string updatedById, 
         CancellationToken cancellationToken = default)
     {
+        _logger.LogInformation("Updating activity: {ActivityId} by user {UserId}", dto.Id, updatedById);
+        
         var activity = await _repository.GetByIdAsync(dto.Id, cancellationToken);
         if (activity == null)
+        {
+            _logger.LogWarning("Cannot update activity {ActivityId} - not found", dto.Id);
             return null;
+        }
 
         activity.Name = dto.Name;
         activity.ActivityTypeId = dto.ActivityTypeId;
@@ -106,18 +135,27 @@ public class ActivityService : IActivityService
         await _repository.UpdateAsync(activity, cancellationToken);
         await _repository.SaveChangesAsync(cancellationToken);
 
+        _logger.LogInformation("Successfully updated activity: {ActivityId} - {ActivityName}", activity.Id, activity.Name);
+
         // Reload with includes
         return await GetActivityByIdAsync(activity.Id, cancellationToken);
     }
 
     public async Task<bool> DeleteActivityAsync(int id, CancellationToken cancellationToken = default)
     {
+        _logger.LogInformation("Attempting to delete activity: {ActivityId}", id);
+        
         var activity = await _repository.GetByIdAsync(id, cancellationToken);
         if (activity == null)
+        {
+            _logger.LogWarning("Cannot delete activity {ActivityId} - not found", id);
             return false;
+        }
 
         await _repository.DeleteAsync(activity, cancellationToken);
         await _repository.SaveChangesAsync(cancellationToken);
+
+        _logger.LogInformation("Successfully deleted activity: {ActivityId} - {ActivityName}", id, activity.Name);
 
         return true;
     }
