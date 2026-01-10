@@ -1,0 +1,242 @@
+@page "/admin/activities/edit/{id:int}"
+@using ImprovByExample.Application.Common.Models.DTOs
+@using ImprovByExample.Web.Services
+@inject ApiClient ApiClient
+@inject NavigationManager Navigation
+@inject ISnackbar Snackbar
+@inject ILogger<EditActivity> Logger
+
+<PageTitle>Edit Activity - Admin</PageTitle>
+
+<MudContainer MaxWidth="MaxWidth.Large" Class="mt-4">
+    <MudText Typo="Typo.h4" GutterBottom="true">Edit Activity</MudText>
+
+    @if (_loading)
+    {
+        <MudProgressCircular Color="Color.Primary" Indeterminate="true" />
+    }
+    else if (_activity == null)
+    {
+        <MudAlert Severity="Severity.Error">Activity not found.</MudAlert>
+        <MudButton Variant="Variant.Filled" 
+                   Color="Color.Primary" 
+                   OnClick="@(() => Navigation.NavigateTo("/admin/activities"))"
+                   Class="mt-4">
+            Back to Manage Activities
+        </MudButton>
+    }
+    else
+    {
+        <MudPaper Class="pa-4 mt-4">
+            <EditForm Model="_activity" OnValidSubmit="HandleValidSubmit">
+                <MudGrid>
+                    <MudItem xs="12">
+                        <MudTextField @bind-Value="_activity.Name" 
+                                      Label="Name" 
+                                      Required="true"
+                                      Variant="Variant.Outlined" />
+                    </MudItem>
+
+                    <MudItem xs="12" md="6">
+                        <MudSelect @bind-Value="_activity.ActivityTypeId" 
+                                   Label="Activity Type" 
+                                   Required="true"
+                                   Variant="Variant.Outlined">
+                            <MudSelectItem Value="1">Game</MudSelectItem>
+                            <MudSelectItem Value="2">Warmup</MudSelectItem>
+                            <MudSelectItem Value="3">Technique</MudSelectItem>
+                            <MudSelectItem Value="4">Exercise</MudSelectItem>
+                        </MudSelect>
+                    </MudItem>
+
+                    <MudItem xs="12" md="6">
+                        <MudSelect T="int?" @bind-Value="_activity.DifficultyId" 
+                                   Label="Difficulty (Optional)" 
+                                   Variant="Variant.Outlined"
+                                   Clearable="true">
+                            <MudSelectItem Value="@((int?)null)">None</MudSelectItem>
+                            <MudSelectItem Value="@((int?)1)">Beginner</MudSelectItem>
+                            <MudSelectItem Value="@((int?)2)">Intermediate</MudSelectItem>
+                            <MudSelectItem Value="@((int?)3)">Advanced</MudSelectItem>
+                        </MudSelect>
+                    </MudItem>
+
+                    <MudItem xs="12">
+                        <MudTextField @bind-Value="_activity.Category" 
+                                      Label="Category" 
+                                      Required="true"
+                                      Variant="Variant.Outlined" />
+                    </MudItem>
+
+                    <MudItem xs="12">
+                        <MudTextField @bind-Value="_activity.Description" 
+                                      Label="Description" 
+                                      Required="true"
+                                      Variant="Variant.Outlined"
+                                      Lines="3" />
+                    </MudItem>
+
+                    <MudItem xs="12">
+                        <MudTextField @bind-Value="_activity.Rules" 
+                                      Label="Rules/Instructions" 
+                                      Required="true"
+                                      Variant="Variant.Outlined"
+                                      Lines="5" />
+                    </MudItem>
+
+                    <MudItem xs="12">
+                        <MudTextField @bind-Value="_activity.Script" 
+                                      Label="Example Script (Optional)" 
+                                      Variant="Variant.Outlined"
+                                      Lines="5" />
+                    </MudItem>
+
+                    <MudItem xs="12" md="4">
+                        <MudNumericField @bind-Value="_activity.MinPlayers" 
+                                         Label="Min Players (Optional)" 
+                                         Variant="Variant.Outlined"
+                                         Min="1" />
+                    </MudItem>
+
+                    <MudItem xs="12" md="4">
+                        <MudNumericField @bind-Value="_activity.MaxPlayers" 
+                                         Label="Max Players (Optional)" 
+                                         Variant="Variant.Outlined"
+                                         Min="1" />
+                    </MudItem>
+
+                    <MudItem xs="12" md="4">
+                        <MudNumericField @bind-Value="_activity.DurationMinutes" 
+                                         Label="Duration (Minutes, Optional)" 
+                                         Variant="Variant.Outlined"
+                                         Min="1" />
+                    </MudItem>
+
+                    <MudItem xs="12">
+                        <MudTextField @bind-Value="_tagsInput" 
+                                      Label="Tags (comma-separated)" 
+                                      Variant="Variant.Outlined"
+                                      HelperText="Enter tags separated by commas, e.g., improv, comedy, group" />
+                    </MudItem>
+
+                    <MudItem xs="12" Class="mt-4">
+                        <MudButton ButtonType="ButtonType.Submit" 
+                                   Variant="Variant.Filled" 
+                                   Color="Color.Primary"
+                                   Disabled="_saving"
+                                   StartIcon="@Icons.Material.Filled.Save">
+                            @(_saving ? "Saving..." : "Save Changes")
+                        </MudButton>
+                        <MudButton Variant="Variant.Outlined" 
+                                   Color="Color.Default"
+                                   OnClick="Cancel"
+                                   Class="ml-2"
+                                   Disabled="_saving">
+                            Cancel
+                        </MudButton>
+                    </MudItem>
+                </MudGrid>
+            </EditForm>
+        </MudPaper>
+    }
+</MudContainer>
+
+@code {
+    [Parameter]
+    public int Id { get; set; }
+
+    private UpdateActivityDto? _activity;
+    private string _tagsInput = string.Empty;
+    private bool _loading = true;
+    private bool _saving = false;
+
+    protected override async Task OnInitializedAsync()
+    {
+        await LoadActivity();
+    }
+
+    private async Task LoadActivity()
+    {
+        _loading = true;
+        try
+        {
+            var activityDto = await ApiClient.GetActivityByIdAsync(Id);
+            if (activityDto != null)
+            {
+                _activity = new UpdateActivityDto
+                {
+                    Id = activityDto.Id,
+                    Name = activityDto.Name,
+                    ActivityTypeId = activityDto.ActivityTypeId,
+                    ActivitySourceId = activityDto.ActivitySourceId,
+                    Description = activityDto.Description,
+                    Rules = activityDto.Rules,
+                    Script = activityDto.Script,
+                    Category = activityDto.Category,
+                    DifficultyId = activityDto.DifficultyId,
+                    MinPlayers = activityDto.MinPlayers,
+                    MaxPlayers = activityDto.MaxPlayers,
+                    DurationMinutes = activityDto.DurationMinutes,
+                    Tags = activityDto.Tags
+                };
+                _tagsInput = string.Join(", ", activityDto.Tags);
+            }
+        }
+        catch (Exception ex)
+        {
+            Logger.LogError(ex, "Error loading activity {ActivityId}", Id);
+        }
+        finally
+        {
+            _loading = false;
+        }
+    }
+
+    private async Task HandleValidSubmit()
+    {
+        if (_activity == null) return;
+
+        _saving = true;
+        try
+        {
+            // Parse tags
+            if (!string.IsNullOrWhiteSpace(_tagsInput))
+            {
+                _activity.Tags = _tagsInput
+                    .Split(',')
+                    .Select(t => t.Trim())
+                    .Where(t => !string.IsNullOrEmpty(t))
+                    .ToArray();
+            }
+            else
+            {
+                _activity.Tags = Array.Empty<string>();
+            }
+
+            var updated = await ApiClient.UpdateActivityAsync(Id, _activity);
+            if (updated != null)
+            {
+                Snackbar.Add($"Activity '{updated.Name}' updated successfully!", Severity.Success);
+                Navigation.NavigateTo("/admin/activities");
+            }
+            else
+            {
+                Snackbar.Add("Failed to update activity", Severity.Error);
+            }
+        }
+        catch (Exception ex)
+        {
+            Logger.LogError(ex, "Error updating activity {ActivityId}", Id);
+            Snackbar.Add("Error updating activity. Please check the console for details.", Severity.Error);
+        }
+        finally
+        {
+            _saving = false;
+        }
+    }
+
+    private void Cancel()
+    {
+        Navigation.NavigateTo("/admin/activities");
+    }
+}
