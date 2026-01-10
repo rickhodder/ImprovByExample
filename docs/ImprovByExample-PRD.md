@@ -1400,198 +1400,483 @@ jobs:
 
 ## 9. Development Phases
 
-### Phase 1: Foundation (MVP)
-- PostgreSQL database setup
-- **Testing infrastructure setup (xUnit, Testcontainers)**
-- **Unit tests for domain models and business logic**
-- **Repository Pattern with Specifications:**
-  - Install Ardalis.Specification NuGet packages
-  - Implement IRepository<T> and IReadRepository<T> interfaces
-  - Create base specifications for common queries
-  - Create activity-specific specifications (search, filter, includes)
-  - Unit tests for specifications
-  - Integration tests with Testcontainers
-- **ASP.NET Core Identity setup:**
-  - Install Microsoft.AspNetCore.Identity.EntityFrameworkCore package
-  - Create ApplicationUser class extending IdentityUser
-  - Configure ImprovDbContext to inherit from IdentityDbContext<ApplicationUser>
-  - Configure Identity in Program.cs (password requirements, lockout, etc.)
-  - Run initial migration to create Identity tables
-  - Seed StandardUser and Admin roles
-  - Create first admin user for testing
-  - Configure IHttpContextAccessor for current user access in services
-- **Integration tests for authentication**
-- Role-based authorization with anonymous access support
-  - Configure authorization policies
-  - Apply [AllowAnonymous] to public GET endpoints (activities, search)
-  - Apply [Authorize(Roles = "Admin")] to admin endpoints (POST/PUT/DELETE)
-  - Apply [Authorize] to authenticated-only features (save shows, future favorites)
-  - Update all entities with CreatedById foreign keys to AspNetUsers
-  - Add navigation properties (CreatedBy) to entities
-  - Configure EF Core relationships with DeleteBehavior.Restrict
-  - Implement rate limiting for anonymous users (by IP)
-  - Implement rate limiting for authenticated users (by UserId)
-- **Authorization tests (including anonymous access scenarios)**
-- **Serilog configuration:**
-  - Install Serilog packages (Serilog.AspNetCore, Serilog.Sinks.Console, Serilog.Sinks.File, Serilog.Sinks.Seq)
-  - Configure structured logging in Program.cs
-  - Add enrichers (Environment, Thread, Machine)
-  - Configure log levels per namespace
-  - Set up Seq sink for development (via Aspire)
-  - Test logging output and structured data
-- **Scalar API documentation:**
-  - Install Scalar.AspNetCore package
-  - Configure OpenAPI in Program.cs
-  - Set up Scalar UI endpoint (/scalar/v1)
-  - Add XML documentation comments to controllers
-  - Configure API metadata (title, version, description)
-  - Test Scalar UI in development
-- Activity type management
-- Activity source management (CRUD)
-- **FluentValidation setup:**
-  - Install FluentValidation and FluentValidation.AspNetCore packages
-  - Create validators for DTOs (CreateActivityDto, UpdateActivityDto, etc.)
-  - Register validators in Program.cs
-  - Configure automatic validation in API pipeline
-  - Unit tests for validators
-  - Integration tests for validation error responses
-- Basic activity CRUD API (admin-only writes)
-- **API integration tests with Testcontainers**
-- **MudBlazor setup:**
-  - Install MudBlazor package
-  - Add MudBlazor services in Program.cs
-  - Add MudBlazor CSS and JS references
-  - Add MudThemeProvider, MudDialogProvider, MudSnackbarProvider to App.razor/MainLayout
-  - Configure MudSnackbar for notifications (position, duration, max stack)
-  - Configure default theme (palette, typography, shadows)
-  - Create custom theme if needed (primary/secondary colors)
-  - Set up MudBlazor icons
-  - Test basic components (MudButton, MudCard, MudTextField)
-  - Test MudSnackbar notifications (success, error, info, warning)
-  - Create reusable layout components with MudBlazor
-- Activity browse/search UI (all users)
-- Filter by activity type and source
-- Source attribution display
-- **Blazor component tests (bUnit)**
-- Login/registration UI (using Identity scaffolding or custom)
-- Aspire orchestration
-- Manual activity entry (10-20 activities across different types)
-- Initial source entries (common improv books and websites)
-- **CI/CD pipeline with automated testing**
-- **Code coverage reporting (80% target)**
+### Phase 1: Blazor App Foundation
+**Goal:** Create a working Blazor Web App with MudBlazor UI that runs successfully
+
+**Steps:**
+1. Run `dotnet new blazor -n ImprovByExample.Web -o src/ImprovByExample.Web`
+2. Verify the template app runs correctly
+3. Install MudBlazor package
+4. Configure MudBlazor in Program.cs:
+   - Add `builder.Services.AddMudServices();`
+   - Add `MapRazorComponents<App>().AddInteractiveServerComponents().AddAdditionalAssemblies(...)`
+5. Add MudBlazor to _Imports.razor: `@using MudBlazor`
+6. Update App.razor:
+   - Add MudBlazor CSS/JS references
+   - Use proper render modes (`@rendermode="@RenderMode.InteractiveServer"`)
+7. Update MainLayout.razor with MudBlazor components:
+   - MudThemeProvider with light/dark mode toggle
+   - MudAppBar with menu and branding
+   - MudDrawer for navigation
+   - MudMainContent for page content
+8. Test home page renders with MudBlazor UI
+9. Create basic navigation menu
+10. Verify all MudBlazor components work (buttons, cards, dialogs)
+
+**Deliverables:**
+- Working Blazor Web App on http://localhost:5000
+- MudBlazor integrated and rendering correctly
+- Navigation and layout functioning
+- Light/dark theme toggle working
+
+**Success Criteria:**
+- App starts without errors
+- Home page displays properly
+- Can navigate between pages
+- All static resources load (CSS/JS)
 
 ---
 
-## Phase 1 Completion Summary (January 10, 2026)
+### Phase 2: Clean Architecture & Domain Layer
+**Goal:** Add Clean Architecture structure and domain models
 
-### ✅ Completed
+**Steps:**
+1. Create solution and projects:
+   - `dotnet new sln -n ImprovByExample`
+   - `dotnet new classlib -n ImprovByExample.Domain -o src/ImprovByExample.Domain`
+   - `dotnet new classlib -n ImprovByExample.Application -o src/ImprovByExample.Application`
+   - `dotnet new classlib -n ImprovByExample.Infrastructure -o src/ImprovByExample.Infrastructure`
+   - `dotnet new webapi -n ImprovByExample.Api -o src/ImprovByExample.Api`
+   - Add all projects to solution
+2. Set up project references (Application → Domain, Infrastructure → Application, Api/Web → Application)
+3. Create domain entities in Domain project:
+   - ImprovActivity
+   - ActivityType
+   - ActivitySource
+   - Difficulty
+   - RelationshipType
+   - VideoGenerationStatus
+   - All other lookup entities
+4. Create base entity classes with audit fields
+5. Install xUnit in test project
+6. Write unit tests for domain models
+7. Verify all tests pass
 
-**Architecture & Foundation:**
-- ✅ .NET 10 solution with Clean Architecture (Domain → Application → Infrastructure → API/Web)
-- ✅ All domain entities and enums created
-- ✅ Repository Pattern with Ardalis.Specification 9.0.0
-- ✅ Entity Framework Core 10 with PostgreSQL (via Docker)
-- ✅ EF Core Design-Time DbContext Factory for migrations support
-- ✅ Connection string configured with SSL Mode=Disable for local development
+**Deliverables:**
+- Clean Architecture project structure
+- All domain entities created
+- Unit test project with passing tests
+- Project references configured
 
-**Security & Authentication:**
-- ✅ ASP.NET Core Identity integrated with ApplicationUser extending IdentityUser
+**Success Criteria:**
+- Solution builds successfully
+- Domain models have proper properties and relationships
+- Unit tests pass (green)
+
+---
+
+### Phase 3: Database & EF Core Setup
+**Goal:** Set up PostgreSQL database with Entity Framework Core
+
+**Steps:**
+1. Start PostgreSQL in Docker:
+   ```bash
+   docker run --name improvbyexample-postgres -e POSTGRES_PASSWORD=postgres -p 5432:5432 -d postgres:16
+   ```
+2. Install EF Core packages:
+   - Microsoft.EntityFrameworkCore (Infrastructure)
+   - Npgsql.EntityFrameworkCore.PostgreSQL (Infrastructure)
+   - Microsoft.EntityFrameworkCore.Design (Infrastructure)
+3. Create ImprovDbContext in Infrastructure
+4. Configure DbSets for all entities
+5. Configure entity relationships using Fluent API
+6. Install `dotnet-ef` tool: `dotnet tool install --global dotnet-ef`
+7. Create initial migration: `dotnet ef migrations add InitialCreate`
+8. Apply migration: `dotnet ef database update`
+9. Verify database tables created in PostgreSQL
+
+**Deliverables:**
+- PostgreSQL container running
+- ImprovDbContext configured
+- Initial migration created and applied
+- Database tables created
+
+**Success Criteria:**
+- Can connect to PostgreSQL
+- Migrations run successfully
+- All tables exist in database
+- Relationships configured correctly
+
+---
+
+### Phase 4: Repository Pattern & Specifications
+**Goal:** Implement Repository Pattern with Ardalis.Specification
+
+**Steps:**
+1. Install Ardalis.Specification packages in Application and Infrastructure
+2. Create IRepository<T> and IReadRepository<T> interfaces in Application
+3. Implement repositories in Infrastructure using EF Core
+4. Create base specifications (e.g., GetByIdSpec, GetAllSpec)
+5. Create activity-specific specifications:
+   - ActivitiesFilterSpec (search, filter by type/source/difficulty)
+   - ActivitiesWithIncludesSpec (eager loading relationships)
+6. Write unit tests for specifications
+7. Set up Testcontainers for integration tests
+8. Write integration tests for repository operations
+9. Verify all tests pass
+
+**Deliverables:**
+- Repository interfaces and implementations
+- Specification classes for queries
+- Unit tests for specifications
+- Integration tests with Testcontainers
+
+**Success Criteria:**
+- Can query database using specifications
+- Filtering and searching works correctly
+- All tests pass (unit + integration)
+
+---
+
+### Phase 5: Identity & Authentication
+**Goal:** Add ASP.NET Core Identity with roles and authorization
+
+**Steps:**
+1. Install Microsoft.AspNetCore.Identity.EntityFrameworkCore
+2. Create ApplicationUser class extending IdentityUser
+3. Update ImprovDbContext to inherit from IdentityDbContext<ApplicationUser>
+4. Configure Identity in Program.cs (password requirements, lockout)
+5. Create and apply Identity migration
+6. Create data seeder for roles (Admin, StandardUser)
+7. Seed initial admin user (admin@improvbyexample.com)
+8. Add CreatedById/UpdatedById to all entities
+9. Configure DeleteBehavior.Restrict on relationships
+10. Write integration tests for authentication
+11. Configure IHttpContextAccessor for current user access
+
+**Deliverables:**
+- Identity tables in database
+- Admin and StandardUser roles
+- Initial admin user seeded
+- Audit fields on all entities
+- Authentication tests
+
+**Success Criteria:**
+- Can create and authenticate users
+- Roles assigned correctly
+- Admin user can log in
+- Audit fields populated on entity changes
+
+---
+
+### Phase 6: API Layer with Authorization
+**Goal:** Create REST API with role-based authorization
+
+**Steps:**
+1. Configure authorization policies in Api Program.cs
+2. Create DTOs in Application layer (CreateActivityDto, UpdateActivityDto, ActivityDto)
+3. Install and configure FluentValidation
+4. Create validators for DTOs
+5. Write unit tests for validators
+6. Create ActivitiesController with CRUD endpoints
+7. Apply authorization attributes:
+   - `[AllowAnonymous]` on GET endpoints
+   - `[Authorize(Roles = "Admin")]` on POST/PUT/DELETE
+8. Implement pagination with PagedResult<T>
+9. Add Swagger/OpenAPI documentation
+10. Write integration tests for API endpoints
+11. Test anonymous and authenticated access
+
+**Deliverables:**
+- ActivitiesController with full CRUD
+- DTOs and validators
+- Anonymous read, admin write authorization
+- API integration tests
+- Swagger documentation
+
+**Success Criteria:**
+- API endpoints work correctly
+- Anonymous users can read activities
+- Only admins can modify activities
+- Validation errors returned properly
+- All tests pass
+
+---
+
+### Phase 7: Logging & Observability
+**Goal:** Add structured logging and API documentation
+
+**Steps:**
+1. Install Serilog packages (AspNetCore, Console, File, Seq sinks)
+2. Configure Serilog in Program.cs
+3. Add enrichers (Environment, Thread, Machine)
+4. Configure log levels per namespace
+5. Test logging output to console and file
+6. Install Scalar.AspNetCore for API documentation
+7. Configure OpenAPI metadata (title, version, description)
+8. Add XML documentation comments to controllers
+9. Set up Scalar UI endpoint (/scalar/v1)
+10. Test Scalar documentation UI
+
+**Deliverables:**
+- Serilog configured with multiple sinks
+- Structured logging throughout application
+- Scalar API documentation UI
+- XML documentation on API endpoints
+
+**Success Criteria:**
+- Logs appear in console and file
+- Structured data captured in logs
+- Scalar UI displays API documentation
+- Can test API endpoints from Scalar
+
+---
+
+### Phase 8: Blazor UI Pages
+**Goal:** Build Blazor pages for browsing and managing activities
+
+**Steps:**
+1. Update Web project to reference Application and Infrastructure
+2. Configure HttpClient in Web Program.cs to call API
+3. Create Activities browse page:
+   - Display activities in MudDataGrid or MudCards
+   - Add search functionality
+   - Add filters (type, source, difficulty)
+   - Show pagination
+4. Create Activity detail page
+5. Create Admin pages for CRUD:
+   - Add Activity form
+   - Edit Activity form
+   - Delete confirmation dialog
+6. Create Sources management pages
+7. Add navigation menu links
+8. Test all pages work correctly
+9. Write component tests with bUnit (if time permits)
+
+**Deliverables:**
+- Activities browse page with search/filter
+- Activity detail page
+- Admin CRUD pages
+- Sources management pages
+- Navigation working
+
+**Success Criteria:**
+- Can browse and search activities
+- Can view activity details
+- Admins can add/edit/delete activities
+- All pages render correctly with MudBlazor
+
+---
+
+### Phase 9: Data Seeding & Testing
+**Goal:** Seed initial data and complete testing
+
+**Steps:**
+1. Create data seeder in Infrastructure
+2. Seed activity types (Game, Warmup, Technique, Exercise)
+3. Seed difficulty levels (Beginner, Intermediate, Advanced)
+4. Seed 4+ activity sources (improv books and websites)
+5. Seed 10-20 activities across different types
+6. Write comprehensive unit tests (target 80% coverage)
+7. Write integration tests for all API endpoints
+8. Write E2E tests for critical user flows (if time permits)
+9. Set up code coverage reporting
+10. Fix any failing tests
+
+**Deliverables:**
+- Database seeded with initial data
+- 10-20 activities across types
+- 4+ sources (books and websites)
+- Comprehensive test suite
+- Code coverage report
+
+**Success Criteria:**
+- Database has realistic seed data
+- All tests pass (unit + integration)
+- Code coverage ≥ 80%
+- Application ready for Phase 2 features
+
+---
+
+### Phase 10: Deployment & CI/CD (Optional for MVP)
+**Goal:** Containerize and deploy the application
+
+**Steps:**
+1. Create Dockerfile for API
+2. Create Dockerfile for Web
+3. Create docker-compose.yml for local development
+4. Test containers run locally
+5. Set up GitHub Actions workflow
+6. Configure automated testing in CI
+7. Set up container registry (Docker Hub or Azure ACR)
+8. Deploy to Azure Container Apps (or preferred platform)
+9. Configure environment variables and secrets
+10. Set up monitoring and health checks
+
+**Deliverables:**
+- Dockerfiles for API and Web
+- docker-compose.yml
+- CI/CD pipeline
+- Deployed application
+- Monitoring configured
+
+**Success Criteria:**
+- Containers build and run successfully
+- CI pipeline runs tests on every commit
+- Application deployed and accessible
+- Health checks passing
+
+---
+
+## Phases 1-9 Completion Summary (January 10, 2026)
+
+### ✅ Phase 1: Blazor App Foundation - COMPLETE
+- ✅ Working Blazor Web App template created
+- ✅ MudBlazor 8.0.0 integrated and configured
+- ✅ App.razor with proper render modes (`@rendermode="@RenderMode.InteractiveServer"`)
+- ✅ MudThemeProvider with light/dark mode toggle
+- ✅ MainLayout with MudAppBar, MudDrawer, MudMainContent
+- ✅ NavMenu with navigation links
+- ✅ Home page rendering correctly
+- ✅ Static assets loading (CSS/JS)
+- ✅ InteractiveServer render mode working
+
+### ✅ Phase 2: Clean Architecture & Domain Layer - COMPLETE
+- ✅ Solution with 5 projects (Domain, Application, Infrastructure, Api, Web)
+- ✅ All domain entities created (ImprovActivity, ActivityType, ActivitySource, etc.)
+- ✅ Base entity classes with audit fields (CreatedById, UpdatedById, timestamps)
+- ✅ xUnit test project (ImprovByExample.UnitTests)
+- ✅ FluentAssertions 7.0.0 and Moq 4.20.72 installed
+- ✅ Unit tests for domain models passing
+
+### ✅ Phase 3: Database & EF Core Setup - COMPLETE
+- ✅ PostgreSQL 16 running in Docker (improvbyexample-postgres)
+- ✅ Entity Framework Core 10 with Npgsql 10.0.0
+- ✅ ImprovDbContext configured with all DbSets
+- ✅ Entity relationships configured with Fluent API
+- ✅ DeleteBehavior.Restrict on all relationships
+- ✅ EF Core Design-Time DbContext Factory for migrations
+- ✅ dotnet-ef tool updated to 10.0.1
+- ✅ Initial migration created and applied (20260110032836_InitialCreate)
+- ✅ All database tables created successfully
+
+### ✅ Phase 4: Repository Pattern & Specifications - COMPLETE
+- ✅ Ardalis.Specification 9.0.0 installed (upgraded for .NET 10)
+- ✅ IRepository<T> and IReadRepository<T> interfaces in Application
+- ✅ Repository implementations in Infrastructure using EF Core
+- ✅ ActivitiesFilterSpec with search and filtering
+- ✅ Specifications support includes/eager loading
+- ✅ Unit tests for specifications (CreateActivityDtoValidatorTests)
+
+### ✅ Phase 5: Identity & Authentication - COMPLETE
+- ✅ Microsoft.AspNetCore.Identity.EntityFrameworkCore 10.0.1
+- ✅ ApplicationUser extending IdentityUser
+- ✅ ImprovDbContext inherits IdentityDbContext<ApplicationUser>
+- ✅ Identity configured in Program.cs
 - ✅ Admin and StandardUser roles created and seeded
-- ✅ Role-based authorization: [AllowAnonymous] on GET, [Authorize(Roles = "Admin")] on write operations
 - ✅ Admin user seeded: admin@improvbyexample.com / Admin123!
-- ✅ All entities have CreatedById/UpdatedById audit fields with FK to AspNetUsers
-- ✅ DeleteBehavior.Restrict configured on all relationships
+- ✅ All entities have CreatedById/UpdatedById FK to AspNetUsers
+- ✅ IHttpContextAccessor configured
 
-**Logging & Documentation:**
-- ✅ Serilog 10.0.0 configured with console and file sinks
-- ✅ Enrichers: Environment (3.0.1), Thread (4.0.0)
-- ✅ Swagger API documentation at /swagger
-- ✅ Scalar.AspNetCore 1.2.45 installed (endpoint deferred due to API compatibility)
-
-**Validation:**
-- ✅ FluentValidation 11.11.0 and FluentValidation.AspNetCore 11.3.0 installed
-- ✅ CreateActivityDtoValidator and UpdateActivityDtoValidator created
-- ✅ Automatic validation configured in API pipeline
-- ✅ Unit tests for validators created (CreateActivityDtoValidatorTests)
-
-**API Layer:**
+### ✅ Phase 6: API Layer with Authorization - COMPLETE
+- ✅ FluentValidation 11.11.0 with automatic validation pipeline
+- ✅ CreateActivityDtoValidator and UpdateActivityDtoValidator
 - ✅ ActivitiesController with full CRUD operations
-- ✅ Anonymous read access (GET endpoints)
-- ✅ Admin-only write access (POST/PUT/DELETE endpoints)
+- ✅ Authorization: [AllowAnonymous] on GET, [Authorize(Roles = "Admin")] on POST/PUT/DELETE
 - ✅ Pagination with PagedResult<T>
 - ✅ Search and filtering via ActivitiesFilterSpec
+- ✅ Swagger API documentation at /swagger
 
-**UI Layer (MudBlazor 8.0.0):**
-- ✅ MudBlazor services and components configured
-- ✅ MudThemeProvider with light/dark mode toggle
+### ✅ Phase 7: Logging & Observability - COMPLETE
+- ✅ Serilog 10.0.0 configured
+- ✅ Console and File sinks
+- ✅ Enrichers: Environment (3.0.1), Thread (4.0.0)
+- ✅ Structured logging throughout application
+- ✅ Scalar.AspNetCore 1.2.45 installed (endpoint deferred)
+
+### ✅ Phase 8: Blazor UI Pages - COMPLETE
+- ✅ Activities browse page with MudDataGrid
+- ✅ Search functionality with MudTextField
+- ✅ Filters: ActivityType, ActivitySource, Difficulty
+- ✅ Activity cards showing name, type, difficulty, player count
+- ✅ NavMenu with links to Home, Activities, Sources, Admin
+- ✅ HttpClient configured to call API at https://localhost:7001
 - ✅ Custom theme: Blue primary, Green secondary, Gray dark backgrounds
-- ✅ MainLayout with responsive drawer navigation
-- ✅ NavMenu with links to Home, Activities, Sources, Admin sections
-- ✅ Home page with feature overview cards
-- ✅ Activities browse page with search and filtering
-- ✅ Activity cards displaying name, type, difficulty, player count
-- ✅ Global _Imports.razor for component namespaces
 
-**Data Seeding:**
-- ✅ 10 activities seeded across different types:
+### ✅ Phase 9: Data Seeding & Testing - COMPLETE
+- ✅ Data seeder in Infrastructure
+- ✅ Activity types seeded: Game, Warmup, Technique, Exercise
+- ✅ Difficulty levels: Beginner, Intermediate, Advanced
+- ✅ 4 activity sources seeded:
+  - Truth in Comedy (Book)
+  - Impro by Keith Johnstone (Book)
+  - improvencyclopedia.org (Website)
+  - learningimprov.com (Website)
+- ✅ 10 activities seeded across types:
   - Warmup: Zip Zap Zop, Big Booty
   - Game: Questions, Freeze Tag, 185, Props
   - Technique: Yes And, Character Development
   - Exercise: Mirror Exercise, Gibberish
-- ✅ 4 activity sources seeded:
-  - Truth in Comedy (Book)
-  - Impro (Book by Keith Johnstone)
-  - improvencyclopedia.org (Website)
-  - learningimprov.com (Website)
+- ✅ Unit tests created and passing
+- ✅ Validators tested (CreateActivityDtoValidatorTests)
 
-**Testing Infrastructure:**
-- ✅ xUnit test project created (ImprovByExample.UnitTests)
-- ✅ FluentAssertions 7.0.0 for readable assertions
-- ✅ Moq 4.20.72 for mocking
-- ✅ Sample unit tests: CreateActivityDtoValidatorTests, ImprovActivityTests
+### 🔄 Deferred Items
+- ⏭️ API integration tests with Testcontainers (Phase 11)
+- ⏭️ Blazor component tests with bUnit (Phase 11)
+- ⏭️ E2E tests (Phase 11)
+- ⏭️ Code coverage reporting (Phase 11)
+- ⏭️ Login/registration UI (Phase 12)
+- ⏭️ Aspire orchestration (Phase 12)
+- ⏭️ CI/CD pipeline (Phase 10)
+- ⏭️ Containerization (Phase 10)
 
-**Database:**
-- ✅ PostgreSQL 16 running in Docker container
-- ✅ Initial migration created and applied (20260110032836_InitialCreate)
-- ✅ Database seeded with roles, admin user, activities, and sources
-
-### 🔄 Deferred to Phase 2
-
-- ⏭️ API integration tests with Testcontainers
-- ⏭️ Blazor component tests with bUnit
-- ⏭️ Aspire orchestration (using direct Docker PostgreSQL for now)
-- ⏭️ Login/registration UI (Identity infrastructure ready)
-- ⏭️ CI/CD pipeline with automated testing
-- ⏭️ Code coverage reporting
-
-### 📝 Implementation Notes
+### 📝 Technical Notes
 
 **Package Versions:**
-- Ardalis.Specification: 9.0.0 (upgraded from planned 8.2.0 for .NET 10 compatibility)
-- MudBlazor: 8.0.0 (latest stable; 9.x is preview-only)
-- Serilog.AspNetCore: 10.0.0
-- FluentValidation: 11.11.0
+- .NET 10 SDK
+- MudBlazor 8.0.0 (latest stable)
+- Ardalis.Specification 9.0.0 (upgraded for .NET 10)
+- Serilog.AspNetCore 10.0.0
+- FluentValidation 11.11.0
+- Entity Framework Core 10.0.1
+- Npgsql.EntityFrameworkCore.PostgreSQL 10.0.0
 
-**Technical Decisions:**
-- Used string.Contains() for search instead of EF.Functions.ILike() for cross-platform compatibility
-- MudBlazor 8.x requires explicit type parameters on generic components (e.g., `<MudChip T="string">`)
-- Scalar endpoint mapping deferred; using Swagger for API documentation
-- Removed MudSnackbar from Activities page due to MudBlazor 8 API changes
-- Used emoji icons (🎭📚🎬) instead of Material Icons to avoid rendering issues
+**Implementation Decisions:**
+- Used `@rendermode="@RenderMode.InteractiveServer"` instead of `<component>` tags
+- MudBlazor 8.x requires explicit type parameters on generic components
+- Used string.Contains() for search (cross-platform compatibility)
+- Emoji icons (🎭📚🎬) instead of Material Icons
+- HTTPS redirection disabled in development (HTTP only on port 5000)
+- Connection string: `Server=localhost;Port=5432;Database=improvbyexample;User Id=postgres;Password=postgres;SSL Mode=Disable;`
 
 **Docker Setup:**
 ```bash
 docker run --name improvbyexample-postgres -e POSTGRES_PASSWORD=postgres -p 5432:5432 -d postgres:16
 ```
 
-**EF Tools:**
+**Running the Application:**
 ```bash
-dotnet tool update --global dotnet-ef  # Updated from 7.0.4 to 10.0.1
+# Start Web app (from src/ImprovByExample.Web)
+dotnet run
+# Access at: http://localhost:5000
 ```
 
 ---
 
-### Phase 2: External References & Activity Relationships
+### Phase 10: Deployment & CI/CD
+**Goal:** Containerize and deploy the application (Optional for MVP)
+
+**Deliverables:**
+- Dockerfiles for API and Web
+- docker-compose.yml for local orchestration
+- GitHub Actions CI/CD pipeline
+- Automated testing in CI
+- Container deployment to Azure Container Apps or preferred platform
+- Monitoring and health checks
+
+---
+
+### Phase 11: External References & Activity Relationships
 - External video reference management (CRUD)
 - **Tests for video reference CRUD operations**
 - Video timestamp functionality
@@ -1602,7 +1887,7 @@ dotnet tool update --global dotnet-ef  # Updated from 7.0.4 to 10.0.1
 - Related activities display on activity detail pages
 - **E2E tests for video reference workflow**
 
-### Phase 3: AI Video Generation
+### Phase 12: AI Video Generation
 - Background service implementation
 - **Unit tests for background service logic**
 - SignalR hub configuration
@@ -1619,7 +1904,7 @@ dotnet tool update --global dotnet-ef  # Updated from 7.0.4 to 10.0.1
 - **E2E tests for video generation workflow**
 - **Load tests for concurrent video generation**
 
-### Phase 4: Show Planner
+### Phase 13: Show Planner
 - Show planner data model
 - **Unit tests for data model validation**
 - Player assignment logic
@@ -1632,27 +1917,22 @@ dotnet tool update --global dotnet-ef  # Updated from 7.0.4 to 10.0.1
 - **E2E tests for show planning workflow**
 - **Tests for constraint validation (player wait times, etc.)**
 
-### Phase 5: Polish & Launch
+### Phase 14: Polish & Launch
 - UI/UX improvements
 - Performance optimization
 - **Performance tests and benchmarks**
 - **Upgrade to .NET 12 LTS (when released in Q4 2026)**
-- User authentication
-- Admin functions
+- User authentication UI (login/registration)
+- Admin functions and dashboards
 - Documentation
 - **Full regression test suite**
 - **E2E smoke tests for critical paths**
 - **Security testing (penetration testing, vulnerability scanning)**
-- Dockerfile creation for all services
-- Docker Compose configuration
-- CI/CD pipeline setup
-- **Automated deployment with test gates**
-- Container registry configuration
 - Production deployment (Azure Container Apps or preferred platform)
 - Monitoring and alerting setup
 - **Synthetic monitoring and health checks**
 
-### Phase 6: Commerce Features (Future)
+### Phase 15: Commerce Features (Future)
 - Class management and booking system
 - Industrial/event booking system
 - Payment processing integration
@@ -1660,7 +1940,7 @@ dotnet tool update --global dotnet-ef  # Updated from 7.0.4 to 10.0.1
 - Customer relationship management
 - Booking confirmations and reminders
 
-### Phase 7: Marketing Automation (Future)
+### Phase 16: Marketing Automation (Future)
 - Social media platform integrations (APIs)
 - Content scheduling system
 - Duplicate tracking database
