@@ -67,7 +67,7 @@
                         <MudCardContent>
                             <MudText Typo="Typo.body2" Class="mb-2">
                                 @(activity.Description.Length > 150 
-                                    ? activity.Description.Substring(0, 150) + "..." 
+                                    ? activity.Description[..150] + "..." 
                                     : activity.Description)
                             </MudText>
                             @if (activity.DifficultyName != null)
