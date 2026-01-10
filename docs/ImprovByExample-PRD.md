@@ -23,12 +23,17 @@
 ### Implementation
 - [8. Deployment & Containerization](#8-deployment--containerization) - Docker, CI/CD, deployment options
 - [9. Development Phases](#9-development-phases) - **Start Here!** Phase-by-phase roadmap
-  - [Phase 1: Foundation (MVP)](#phase-1-foundation-mvp) - **Your starting point (with tests!)**
-  - [Phase 2: External References](#phase-2-external-references--activity-relationships)
-  - [Phase 3: AI Video Generation](#phase-3-ai-video-generation)
-  - [Phase 4: Show Planner](#phase-4-show-planner)
-  - [Phase 5: Polish & Launch](#phase-5-polish--launch)
-  - [Phase 6: Commerce (Future)](#phase-6-commerce-features-future)
+  - [9.1 MVP Implementation Phases](#91-mvp-implementation-phases) - Detailed technical setup steps
+    - [MVP Phase 1: Blazor App Foundation](#mvp-phase-1-blazor-app-foundation)
+    - [MVP Phase 2-10: Infrastructure & Features](#mvp-phase-2-clean-architecture--domain-layer)
+  - [9.2 Feature Phases](#92-feature-phases) - Major functionality milestones
+    - [Phase 1: Foundation (MVP)](#phase-1-foundation-mvp) - ✅ COMPLETE
+    - [Phase 2: External References](#phase-2-external-references--activity-relationships) - 🚧 IN PROGRESS
+    - [Phase 3: AI Video Generation](#phase-3-ai-video-generation)
+    - [Phase 4: Show Planner](#phase-4-show-planner)
+    - [Phase 5: Polish & Launch](#phase-5-polish--launch)
+    - [Phase 6: Commerce (Future)](#phase-6-commerce-features-future)
+    - [Phase 7: Marketing Automation (Future)](#phase-7-marketing-automation-future)
 
 ### Future Planning
 - [10. Future Enhancements](#10-future-enhancements) - Features for later phases
@@ -274,9 +279,11 @@ ImprovByExample/
 │   │   │   ├── ImprovActivity.cs
 │   │   │   ├── ActivityType.cs
 │   │   │   ├── ActivitySource.cs
+│   │   │   ├── SourceType.cs
 │   │   │   ├── Difficulty.cs
 │   │   │   ├── RelationshipType.cs
 │   │   │   ├── ExternalVideoReference.cs
+│   │   │   ├── VideoPlatform.cs
 │   │   │   ├── VideoTimestamp.cs
 │   │   │   ├── ActivityRelationship.cs
 │   │   │   ├── VideoGenerationRequest.cs
@@ -287,8 +294,6 @@ ImprovByExample/
 │   │   │   ├── SocialMediaPostStatus.cs
 │   │   │   └── SocialMediaPostTemplate.cs
 │   │   ├── Enums/
-│   │   │   ├── SourceType.cs
-│   │   │   ├── VideoPlatform.cs
 │   │   │   └── SocialMediaPlatform.cs
 │   │   └── Common/
 │   │       └── BaseEntity.cs
@@ -538,9 +543,22 @@ Easily deployable to any container host
 - UpdatedById (string?, FK to AspNetUsers, optional)
 - UpdatedBy (ApplicationUser?, navigation property)
 
+**SourceType** (Reference Entity)
+- Id (int, PK)
+- Name (string) - Book, Website, Workshop, Class, Person, Original
+- Description (string)
+- IsActive (bool)
+- CreatedAt (DateTime)
+- UpdatedAt (DateTime)
+- CreatedById (string, FK to AspNetUsers)
+- CreatedBy (ApplicationUser, navigation property)
+- UpdatedById (string?, FK to AspNetUsers, optional)
+- UpdatedBy (ApplicationUser?, navigation property)
+
 **ActivitySource**
 - Id (int, PK)
-- SourceType (enum: Book, Website, Workshop, Class, Person, Original)
+- SourceTypeId (int, FK to SourceType)
+- SourceType (SourceType, navigation property)
 - Name (string) - e.g., "Impro: Improvisation and the Theatre", "improvencyclopedia.org"
 - Author (string, optional) - e.g., "Keith Johnstone"
 - Url (string, optional) - Link to source if available
@@ -625,12 +643,25 @@ Easily deployable to any container host
 - UpdatedById (string?, FK to AspNetUsers, optional)
 - UpdatedBy (ApplicationUser?, navigation property)
 
+**VideoPlatform** (Reference Entity)
+- Id (int, PK)
+- Name (string) - YouTube, Vimeo, Other
+- Description (string)
+- IsActive (bool)
+- CreatedAt (DateTime)
+- UpdatedAt (DateTime)
+- CreatedById (string, FK to AspNetUsers)
+- CreatedBy (ApplicationUser, navigation property)
+- UpdatedById (string?, FK to AspNetUsers, optional)
+- UpdatedBy (ApplicationUser?, navigation property)
+
 **ExternalVideoReference**
 - Id (int, PK)
 - ActivityId (int, FK)
 - Url (string)
 - Description (string)
-- Platform (enum: YouTube, Vimeo, Other)
+- VideoPlatformId (int, FK to VideoPlatform)
+- VideoPlatform (VideoPlatform, navigation property)
 - AddedById (string, FK to AspNetUsers)
 - AddedBy (ApplicationUser, navigation property)
 - CreatedAt (DateTime)
@@ -1400,7 +1431,15 @@ jobs:
 
 ## 9. Development Phases
 
-### Phase 1: Blazor App Foundation
+This section covers both the **MVP Implementation Phases** (detailed step-by-step foundation setup) and the **Feature Phases** (major functionality milestones).
+
+---
+
+## 9.1 MVP Implementation Phases
+
+These are detailed technical implementation phases for building the foundation (MVP). Each phase builds upon the previous one.
+
+### MVP Phase 1: Blazor App Foundation
 **Goal:** Create a working Blazor Web App with MudBlazor UI that runs successfully
 
 **Steps:**
@@ -1437,7 +1476,8 @@ jobs:
 
 ---
 
-### Phase 2: Clean Architecture & Domain Layer
+### MVP Phase 2: Clean Architecture & Domain Layer ✅ COMPLETED
+**Status:** ✅ Completed (January 2026)  
 **Goal:** Add Clean Architecture structure and domain models
 
 **Steps:**
@@ -1475,7 +1515,8 @@ jobs:
 
 ---
 
-### Phase 3: Database & EF Core Setup
+### MVP Phase 3: Database & EF Core Setup ✅ COMPLETED
+**Status:** ✅ Completed (January 2026)  
 **Goal:** Set up PostgreSQL database with Entity Framework Core
 
 **Steps:**
@@ -1509,7 +1550,8 @@ jobs:
 
 ---
 
-### Phase 4: Repository Pattern & Specifications
+### MVP Phase 4: Repository Pattern & Specifications ✅ COMPLETED
+**Status:** ✅ Completed (January 2026)  
 **Goal:** Implement Repository Pattern with Ardalis.Specification
 
 **Steps:**
@@ -1538,7 +1580,8 @@ jobs:
 
 ---
 
-### Phase 5: Identity & Authentication
+### MVP Phase 5: Identity & Authentication ✅ COMPLETED
+**Status:** ✅ Completed (January 2026)  
 **Goal:** Add ASP.NET Core Identity with roles and authorization
 
 **Steps:**
@@ -1569,7 +1612,8 @@ jobs:
 
 ---
 
-### Phase 6: API Layer with Authorization
+### MVP Phase 6: API Layer with Authorization ⬜ NOT STARTED
+**Status:** ⬜ Not Started  
 **Goal:** Create REST API with role-based authorization
 
 **Steps:**
@@ -1603,7 +1647,8 @@ jobs:
 
 ---
 
-### Phase 7: Logging & Observability
+### MVP Phase 7: Logging & Observability ⬜ NOT STARTED
+**Status:** ⬜ Not Started  
 **Goal:** Add structured logging and API documentation
 
 **Steps:**
@@ -1632,7 +1677,8 @@ jobs:
 
 ---
 
-### Phase 8: Blazor UI Pages
+### MVP Phase 8: Blazor UI Pages ⬜ NOT STARTED
+**Status:** ⬜ Not Started (Basic pages exist but no API integration)  
 **Goal:** Build Blazor pages for browsing and managing activities
 
 **Steps:**
@@ -1668,37 +1714,47 @@ jobs:
 
 ---
 
-### Phase 9: Data Seeding & Testing
+### MVP Phase 9: Data Seeding & Testing 🔄 PARTIALLY COMPLETED
+**Status:** 🔄 Partially Completed (Seeding done, comprehensive testing needed)  
 **Goal:** Seed initial data and complete testing
 
 **Steps:**
 1. Create data seeder in Infrastructure
-2. Seed activity types (Game, Warmup, Technique, Exercise)
-3. Seed difficulty levels (Beginner, Intermediate, Advanced)
-4. Seed 4+ activity sources (improv books and websites)
-5. Seed 10-20 activities across different types
-6. Write comprehensive unit tests (target 80% coverage)
-7. Write integration tests for all API endpoints
-8. Write E2E tests for critical user flows (if time permits)
-9. Set up code coverage reporting
-10. Fix any failing tests
+2. Seed source types (Book, Website, Workshop, Class, Person, Original)
+3. Seed video platforms (YouTube, Vimeo, Other)
+4. Seed activity types (Game, Warmup, Technique, Exercise)
+5. Seed difficulty levels (Beginner, Intermediate, Advanced)
+6. Seed relationship types (Alias, Variation, Similar)
+7. Seed 4+ activity sources (improv books and websites)
+8. Seed 10-20 activities across different types
+9. Write comprehensive unit tests (target 80% coverage)
+10. Write integration tests for all API endpoints
+11. Write E2E tests for critical user flows (if time permits)
+12. Set up code coverage reporting
+13. Fix any failing tests
 
 **Deliverables:**
 - Database seeded with initial data
+- 6 source types (Book, Website, Workshop, Class, Person, Original)
+- 3 video platforms (YouTube, Vimeo, Other)
+- 4 activity types (Game, Warmup, Technique, Exercise)
+- 3 difficulty levels (Beginner, Intermediate, Advanced)
+- 3 relationship types (Alias, Variation, Similar)
 - 10-20 activities across types
 - 4+ sources (books and websites)
 - Comprehensive test suite
 - Code coverage report
 
 **Success Criteria:**
-- Database has realistic seed data
+- Database has realistic seed data with all lookup tables populated
 - All tests pass (unit + integration)
 - Code coverage ≥ 80%
 - Application ready for Phase 2 features
 
 ---
 
-### Phase 10: Deployment & CI/CD (Optional for MVP)
+### MVP Phase 10: Deployment & CI/CD ⬜ OPTIONAL
+**Status:** ⬜ Not Started (Optional for MVP)  
 **Goal:** Containerize and deploy the application
 
 **Steps:**
@@ -1728,168 +1784,157 @@ jobs:
 
 ---
 
-## Phases 1-9 Status - Ready to Begin
+## 9.2 Feature Phases
 
-### ⏸️ Phase 1: Blazor App Foundation - NOT STARTED
-- ⬜ Working Blazor Web App template created
-- ⬜ MudBlazor 8.0.0 integrated and configured
-- ⬜ App.razor with proper render modes (`@rendermode="@RenderMode.InteractiveServer"`)
-- ⬜ MudThemeProvider with light/dark mode toggle
-- ⬜ MainLayout with MudAppBar, MudDrawer, MudMainContent
-- ⬜ NavMenu with navigation links
-- ⬜ Home page rendering correctly
-- ⬜ Static assets loading (CSS/JS)
-- ⬜ InteractiveServer render mode working
-
-### ⏸️ Phase 2: Clean Architecture & Domain Layer - NOT STARTED
-- ⬜ Solution with 5 projects (Domain, Application, Infrastructure, Api, Web)
-- ⬜ All domain entities created (ImprovActivity, ActivityType, ActivitySource, etc.)
-- ⬜ Base entity classes with audit fields (CreatedById, UpdatedById, timestamps)
-- ⬜ xUnit test project (ImprovByExample.UnitTests)
-- ⬜ FluentAssertions 7.0.0 and Moq 4.20.72 installed
-- ⬜ Unit tests for domain models passing
-
-### ⏸️ Phase 3: Database & EF Core Setup - NOT STARTED
-- ⬜ PostgreSQL 16 running in Docker (improvbyexample-postgres)
-- ⬜ Entity Framework Core 10 with Npgsql 10.0.0
-- ⬜ ImprovDbContext configured with all DbSets
-- ⬜ Entity relationships configured with Fluent API
-- ⬜ DeleteBehavior.Restrict on all relationships
-- ⬜ EF Core Design-Time DbContext Factory for migrations
-- ⬜ dotnet-ef tool updated to 10.0.1
-- ⬜ Initial migration created and applied
-- ⬜ All database tables created successfully
-
-### ⏸️ Phase 4: Repository Pattern & Specifications - NOT STARTED
-- ⬜ Ardalis.Specification 9.0.0 installed (upgraded for .NET 10)
-- ⬜ IRepository<T> and IReadRepository<T> interfaces in Application
-- ⬜ Repository implementations in Infrastructure using EF Core
-- ⬜ ActivitiesFilterSpec with search and filtering
-- ⬜ Specifications support includes/eager loading
-- ⬜ Unit tests for specifications
-
-### ⏸️ Phase 5: Identity & Authentication - NOT STARTED
-- ⬜ Microsoft.AspNetCore.Identity.EntityFrameworkCore 10.0.1
-- ⬜ ApplicationUser extending IdentityUser
-- ⬜ ImprovDbContext inherits IdentityDbContext<ApplicationUser>
-- ⬜ Identity configured in Program.cs
-- ⬜ Admin and StandardUser roles created and seeded
-- ⬜ Admin user seeded: admin@improvbyexample.com / Admin123!
-- ⬜ All entities have CreatedById/UpdatedById FK to AspNetUsers
-- ⬜ IHttpContextAccessor configured
-
-### ⏸️ Phase 6: API Layer with Authorization - NOT STARTED
-- ⬜ FluentValidation 11.11.0 with automatic validation pipeline
-- ⬜ CreateActivityDtoValidator and UpdateActivityDtoValidator
-- ⬜ ActivitiesController with full CRUD operations
-- ⬜ Authorization: [AllowAnonymous] on GET, [Authorize(Roles = "Admin")] on POST/PUT/DELETE
-- ⬜ Pagination with PagedResult<T>
-- ⬜ Search and filtering via ActivitiesFilterSpec
-- ⬜ Swagger API documentation at /swagger
-
-### ⏸️ Phase 7: Logging & Observability - NOT STARTED
-- ⬜ Serilog 10.0.0 configured
-- ⬜ Console and File sinks
-- ⬜ Enrichers: Environment (3.0.1), Thread (4.0.0)
-- ⬜ Structured logging throughout application
-- ⬜ Scalar.AspNetCore 1.2.45 installed
-
-### ⏸️ Phase 8: Blazor UI Pages - NOT STARTED
-- ⬜ Activities browse page with MudDataGrid
-- ⬜ Search functionality with MudTextField
-- ⬜ Filters: ActivityType, ActivitySource, Difficulty
-- ⬜ Activity cards showing name, type, difficulty, player count
-- ⬜ NavMenu with links to Home, Activities, Sources, Admin
-- ⬜ HttpClient configured to call API
-- ⬜ Custom theme configured
-
-### ⏸️ Phase 9: Data Seeding & Testing - NOT STARTED
-- ⬜ Data seeder in Infrastructure
-- ⬜ Activity types seeded: Game, Warmup, Technique, Exercise
-- ⬜ Difficulty levels: Beginner, Intermediate, Advanced
-- ⬜ 4 activity sources seeded
-- ⬜ 10+ activities seeded across types
-- ⬜ Unit tests created and passing
-- ⬜ Validators tested
-
-### 🎯 Next Steps
-1. Start with Phase 1: Create Blazor Web App foundation
-2. Follow phases sequentially
-3. Mark checkboxes as you complete each task
-4. Run and test after each phase
+These are the major feature milestone phases for building out the product functionality.
 
 ---
 
-### Phase 10: Deployment & CI/CD
-**Goal:** Containerize and deploy the application (Optional for MVP)
+### Phase 1: Foundation (MVP)
+**Status:** ✅ COMPLETE
 
-**Deliverables:**
-- Dockerfiles for API and Web
-- docker-compose.yml for local orchestration
-- GitHub Actions CI/CD pipeline
-- Automated testing in CI
-- Container deployment to Azure Container Apps or preferred platform
-- Monitoring and health checks
+This phase establishes the foundation with:
+- Blazor Web App with MudBlazor UI
+- Clean Architecture structure
+- PostgreSQL database with Entity Framework Core
+- Repository pattern with Ardalis.Specification
+- ASP.NET Core Identity with roles
+- Initial data seeding
+
+See **MVP Implementation Phases 1-9** above for detailed steps.
 
 ---
 
-### Phase 11: External References & Activity Relationships
+### Phase 2: External References & Activity Relationships
+**Status:** 🚧 IN PROGRESS
+
+**Goal:** Add support for external video references and activity relationships to enrich the activity database.
+
+**Features:**
 - External video reference management (CRUD)
-- **Tests for video reference CRUD operations**
+  - Support for YouTube, Vimeo, and other video platforms
+  - Video descriptions explaining how they demonstrate activities
+  - Admin interface for adding/editing video references
+  
 - Video timestamp functionality
-- YouTube/Vimeo embed integration
-- Timestamp-based deep linking
-- Activity relationship management (aliases, variations, similar)
-- **Tests for relationship logic and constraints**
-- Related activities display on activity detail pages
-- **E2E tests for video reference workflow**
+  - Add timestamps to videos marking specific moments
+  - Label and describe each timestamp
+  - Clickable timestamps that jump to specific moments in videos
+  
+- Activity relationship management
+  - Link activities as Aliases (same activity, different name)
+  - Link activities as Variations (modified versions)
+  - Link activities as Similar (related activities)
+  - Bidirectional relationship display
+  - Admin interface for creating and managing relationships
+  
+- User interface enhancements
+  - Display external video references on activity detail pages
+  - YouTube/Vimeo embed integration with timestamp support
+  - Related activities section showing aliases, variations, and similar activities
+  - Click-through navigation between related activities
 
-### Phase 12: AI Video Generation
-- Background service implementation
-- **Unit tests for background service logic**
-- SignalR hub configuration
-- **Integration tests for SignalR hub**
-- Real-time progress updates via SignalR
-- **Tests for progress tracking and state management**
-- Video generation API integration
-- **Unit tests with mocked video API**
+**Implementation Steps:**
+1. Create API endpoints for ExternalVideoReference CRUD operations
+2. Create API endpoints for ActivityRelationship CRUD operations  
+3. Add FluentValidation validators for video references and relationships
+4. Build Blazor UI components for managing video references
+5. Build Blazor UI for managing activity relationships
+6. Implement YouTube/Vimeo embed components with timestamp support
+7. Add related activities display to activity detail page
+8. Write unit and integration tests
+
+**Success Criteria:**
+- Admins can add external video references with timestamps to activities
+- Users can click timestamps to jump to specific moments in videos
+- Admins can link activities together with relationship types
+- Users can browse related activities and navigate between them
+- All CRUD operations have appropriate authorization
+- Tests pass with good coverage
+
+---
+
+### Phase 3: AI Video Generation
+**Status:** ⬜ NOT STARTED
+
+**Goal:** Generate AI-powered demonstration videos for activities
+
+**Features:**
+- Background service implementation with unit tests for background service logic
+- SignalR hub configuration with integration tests for SignalR hub
+- Real-time progress updates via SignalR with tests for progress tracking and state management
+- Video generation API integration with unit tests using mocked video API
 - Progress tracking in database
 - Video display in UI
-- Error handling and retries
-- **Tests for retry logic and error scenarios**
+- Error handling and retries with tests for retry logic and error scenarios
 - SignalR reconnection handling
-- **E2E tests for video generation workflow**
-- **Load tests for concurrent video generation**
+- E2E tests for video generation workflow
+- Load tests for concurrent video generation
 
-### Phase 13: Show Planner
-- Show planner data model
-- **Unit tests for data model validation**
-- Player assignment logic
-- **Unit tests for player distribution algorithm**
-- AI optimization integration
-- **Tests with mocked AI optimization**
-- Show planner UI
-- **Component tests for show planner UI**
+**Success Criteria:**
+- Admins can request video generation for activities
+- Real-time progress updates work via SignalR
+- Generated videos display correctly in UI
+- Error handling and retry logic tested
+- All tests pass with good coverage
+
+---
+
+### Phase 4: Show Planner
+**Status:** ⬜ NOT STARTED
+
+**Goal:** AI-powered show planning and player assignment
+
+**Features:**
+- Show planner data model with unit tests for data model validation
+- Player assignment logic with unit tests for player distribution algorithm
+- AI optimization integration with tests using mocked AI optimization
+- Show planner UI with component tests for show planner UI
 - Printable show cards
-- **E2E tests for show planning workflow**
-- **Tests for constraint validation (player wait times, etc.)**
+- E2E tests for show planning workflow
+- Tests for constraint validation (player wait times, etc.)
 
-### Phase 14: Polish & Launch
+**Success Criteria:**
+- Users can create optimized show plans
+- Player distribution algorithm works correctly
+- Show cards can be printed
+- All constraints validated properly
+- Tests pass with good coverage
+
+---
+
+### Phase 5: Polish & Launch
+**Status:** ⬜ NOT STARTED
+
+**Goal:** Production-ready application with full polish
+
+**Features:**
 - UI/UX improvements
-- Performance optimization
-- **Performance tests and benchmarks**
-- **Upgrade to .NET 12 LTS (when released in Q4 2026)**
+- Performance optimization with performance tests and benchmarks
+- Upgrade to .NET 12 LTS (when released in Q4 2026)
 - User authentication UI (login/registration)
 - Admin functions and dashboards
 - Documentation
-- **Full regression test suite**
-- **E2E smoke tests for critical paths**
-- **Security testing (penetration testing, vulnerability scanning)**
+- Full regression test suite
+- E2E smoke tests for critical paths
+- Security testing (penetration testing, vulnerability scanning)
 - Production deployment (Azure Container Apps or preferred platform)
 - Monitoring and alerting setup
-- **Synthetic monitoring and health checks**
+- Synthetic monitoring and health checks
 
-### Phase 15: Commerce Features (Future)
+**Success Criteria:**
+- Application is production-ready
+- All security testing passed
+- Performance benchmarks met
+- Comprehensive documentation complete
+- Deployed to production
+
+---
+
+### Phase 6: Commerce Features (Future)
+**Status:** ⬜ FUTURE
+
+**Features:**
 - Class management and booking system
 - Industrial/event booking system
 - Payment processing integration
@@ -1897,7 +1942,12 @@ jobs:
 - Customer relationship management
 - Booking confirmations and reminders
 
-### Phase 16: Marketing Automation (Future)
+---
+
+### Phase 7: Marketing Automation (Future)
+**Status:** ⬜ FUTURE
+
+**Features:**
 - Social media platform integrations (APIs)
 - Content scheduling system
 - Duplicate tracking database
