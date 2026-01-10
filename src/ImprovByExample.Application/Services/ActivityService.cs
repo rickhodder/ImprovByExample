@@ -27,18 +27,8 @@ public class ActivityService : IActivityService
         var spec = new ActivitiesFilterSpec(filter);
         var activities = await _readRepository.ListAsync(spec, cancellationToken);
         
-        // Get total count for pagination (without paging applied)
-        var countFilter = new ActivityFilterDto
-        {
-            SearchTerm = filter.SearchTerm,
-            ActivityTypeId = filter.ActivityTypeId,
-            ActivitySourceId = filter.ActivitySourceId,
-            DifficultyId = filter.DifficultyId,
-            MinPlayers = filter.MinPlayers,
-            MaxPlayers = filter.MaxPlayers,
-            PageSize = 0 // Disable paging for count
-        };
-        var countSpec = new ActivitiesFilterSpec(countFilter);
+        // Get total count for pagination using a separate count specification
+        var countSpec = new ActivitiesCountSpec(filter);
         var totalCount = await _readRepository.CountAsync(countSpec, cancellationToken);
 
         return new PagedResult<ActivityDto>

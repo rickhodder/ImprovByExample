@@ -100,8 +100,11 @@ public class ActivitiesController : ControllerBase
             return BadRequest(validationResult.Errors);
         }
 
-        var userId = User.FindFirst(ClaimTypes.NameIdentifier)?.Value 
-            ?? throw new InvalidOperationException("User ID not found in claims");
+        var userId = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
+        if (string.IsNullOrEmpty(userId))
+        {
+            return Unauthorized(new { message = "User authentication failed." });
+        }
 
         var created = await _activityService.CreateActivityAsync(dto, userId, cancellationToken);
         
@@ -141,8 +144,11 @@ public class ActivitiesController : ControllerBase
             return BadRequest(validationResult.Errors);
         }
 
-        var userId = User.FindFirst(ClaimTypes.NameIdentifier)?.Value 
-            ?? throw new InvalidOperationException("User ID not found in claims");
+        var userId = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
+        if (string.IsNullOrEmpty(userId))
+        {
+            return Unauthorized(new { message = "User authentication failed." });
+        }
 
         var updated = await _activityService.UpdateActivityAsync(dto, userId, cancellationToken);
         
