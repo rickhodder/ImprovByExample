@@ -1,0 +1,176 @@
+@page "/activities/{id:int}"
+@using ImprovByExample.Application.Common.Models.DTOs
+@using ImprovByExample.Web.Services
+@inject ApiClient ApiClient
+@inject NavigationManager Navigation
+@inject ILogger<ActivityDetail> Logger
+
+<PageTitle>@(_activity?.Name ?? "Activity") - Improv By Example</PageTitle>
+
+<MudContainer MaxWidth="MaxWidth.Large" Class="mt-4">
+    @if (_loading)
+    {
+        <MudProgressCircular Color="Color.Primary" Indeterminate="true" />
+    }
+    else if (_activity == null)
+    {
+        <MudAlert Severity="Severity.Error">Activity not found.</MudAlert>
+        <MudButton Variant="Variant.Filled" 
+                   Color="Color.Primary" 
+                   OnClick="@(() => Navigation.NavigateTo("/activities"))"
+                   Class="mt-4">
+            Back to Activities
+        </MudButton>
+    }
+    else
+    {
+        <MudBreadcrumbs Items="_breadcrumbs" Class="mb-4"></MudBreadcrumbs>
+
+        <MudPaper Class="pa-4 mb-4">
+            <MudGrid>
+                <MudItem xs="12">
+                    <MudText Typo="Typo.h4" GutterBottom="true">@_activity.Name</MudText>
+                    <MudChip T="string" Color="Color.Primary" Text="@_activity.ActivityTypeName" />
+                    @if (_activity.DifficultyName != null)
+                    {
+                        <MudChip T="string" Color="Color.Secondary" Text="@_activity.DifficultyName" />
+                    }
+                </MudItem>
+
+                <MudItem xs="12" Class="mt-4">
+                    <MudText Typo="Typo.h6" GutterBottom="true">Description</MudText>
+                    <MudText Typo="Typo.body1">@_activity.Description</MudText>
+                </MudItem>
+
+                <MudItem xs="12" Class="mt-4">
+                    <MudText Typo="Typo.h6" GutterBottom="true">Rules</MudText>
+                    <MudText Typo="Typo.body1" Style="white-space: pre-line;">@_activity.Rules</MudText>
+                </MudItem>
+
+                @if (!string.IsNullOrEmpty(_activity.Script))
+                {
+                    <MudItem xs="12" Class="mt-4">
+                        <MudText Typo="Typo.h6" GutterBottom="true">Example Script</MudText>
+                        <MudPaper Class="pa-3" Elevation="2">
+                            <MudText Typo="Typo.body2" Style="white-space: pre-line; font-family: monospace;">@_activity.Script</MudText>
+                        </MudPaper>
+                    </MudItem>
+                }
+
+                <MudItem xs="12" sm="6" md="4" Class="mt-4">
+                    <MudText Typo="Typo.subtitle2" Color="Color.Secondary">Category</MudText>
+                    <MudText Typo="Typo.body1">@_activity.Category</MudText>
+                </MudItem>
+
+                @if (_activity.MinPlayers.HasValue || _activity.MaxPlayers.HasValue)
+                {
+                    <MudItem xs="12" sm="6" md="4" Class="mt-4">
+                        <MudText Typo="Typo.subtitle2" Color="Color.Secondary">Players</MudText>
+                        <MudText Typo="Typo.body1">@GetPlayerCountText(_activity.MinPlayers, _activity.MaxPlayers)</MudText>
+                    </MudItem>
+                }
+
+                @if (_activity.DurationMinutes.HasValue)
+                {
+                    <MudItem xs="12" sm="6" md="4" Class="mt-4">
+                        <MudText Typo="Typo.subtitle2" Color="Color.Secondary">Duration</MudText>
+                        <MudText Typo="Typo.body1">@_activity.DurationMinutes minutes</MudText>
+                    </MudItem>
+                }
+
+                @if (_activity.ActivitySourceName != null)
+                {
+                    <MudItem xs="12" sm="6" md="4" Class="mt-4">
+                        <MudText Typo="Typo.subtitle2" Color="Color.Secondary">Source</MudText>
+                        <MudText Typo="Typo.body1">@_activity.ActivitySourceName</MudText>
+                    </MudItem>
+                }
+
+                @if (_activity.Tags.Any())
+                {
+                    <MudItem xs="12" Class="mt-4">
+                        <MudText Typo="Typo.subtitle2" Color="Color.Secondary" GutterBottom="true">Tags</MudText>
+                        @foreach (var tag in _activity.Tags)
+                        {
+                            <MudChip T="string" Size="Size.Small" Text="@tag" />
+                        }
+                    </MudItem>
+                }
+
+                <MudItem xs="12" Class="mt-4">
+                    <MudDivider />
+                </MudItem>
+
+                <MudItem xs="12" Class="mt-2">
+                    <MudText Typo="Typo.caption" Color="Color.Default">
+                        Created: @_activity.CreatedAt.ToString("MMM dd, yyyy")
+                        @if (_activity.UpdatedAt != _activity.CreatedAt)
+                        {
+                            <span> | Updated: @_activity.UpdatedAt.ToString("MMM dd, yyyy")</span>
+                        }
+                    </MudText>
+                </MudItem>
+            </MudGrid>
+        </MudPaper>
+
+        <MudButton Variant="Variant.Outlined" 
+                   Color="Color.Default" 
+                   OnClick="@(() => Navigation.NavigateTo("/activities"))"
+                   StartIcon="@Icons.Material.Filled.ArrowBack">
+            Back to Activities
+        </MudButton>
+    }
+</MudContainer>
+
+@code {
+    [Parameter]
+    public int Id { get; set; }
+
+    private ActivityDto? _activity;
+    private bool _loading = true;
+    private List<BreadcrumbItem> _breadcrumbs = new();
+
+    protected override async Task OnInitializedAsync()
+    {
+        await LoadActivity();
+        UpdateBreadcrumbs();
+    }
+
+    private async Task LoadActivity()
+    {
+        _loading = true;
+        try
+        {
+            _activity = await ApiClient.GetActivityByIdAsync(Id);
+        }
+        catch (Exception ex)
+        {
+            Logger.LogError(ex, "Error loading activity {ActivityId}", Id);
+        }
+        finally
+        {
+            _loading = false;
+        }
+    }
+
+    private void UpdateBreadcrumbs()
+    {
+        _breadcrumbs = new List<BreadcrumbItem>
+        {
+            new BreadcrumbItem("Home", href: "/"),
+            new BreadcrumbItem("Activities", href: "/activities"),
+            new BreadcrumbItem(_activity?.Name ?? "Activity", href: null, disabled: true)
+        };
+    }
+
+    private static string GetPlayerCountText(int? min, int? max)
+    {
+        if (min.HasValue && max.HasValue)
+            return $"{min}-{max} players";
+        if (min.HasValue)
+            return $"{min}+ players";
+        if (max.HasValue)
+            return $"up to {max} players";
+        return "Any number of players";
+    }
+}

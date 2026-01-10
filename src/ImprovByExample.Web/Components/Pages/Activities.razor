@@ -1,0 +1,173 @@
+@page "/activities"
+@using ImprovByExample.Application.Common.Models.DTOs
+@using ImprovByExample.Application.Common.Models.Responses
+@using ImprovByExample.Web.Services
+@inject ApiClient ApiClient
+@inject NavigationManager Navigation
+@inject ILogger<Activities> Logger
+
+<PageTitle>Browse Activities - Improv By Example</PageTitle>
+
+<MudContainer MaxWidth="MaxWidth.ExtraLarge" Class="mt-4">
+    <MudText Typo="Typo.h4" GutterBottom="true">Browse Activities</MudText>
+    <MudText Typo="Typo.body1" Class="mb-4">
+        Explore our comprehensive database of improv activities including games, techniques, warmups, and exercises.
+    </MudText>
+
+    <MudPaper Class="pa-4 mb-4">
+        <MudGrid>
+            <MudItem xs="12" md="6">
+                <MudTextField @bind-Value="_filter.SearchTerm" 
+                              Label="Search" 
+                              Placeholder="Search activities by name or description..."
+                              Adornment="Adornment.Start" 
+                              AdornmentIcon="@Icons.Material.Filled.Search"
+                              Immediate="false"
+                              OnKeyUp="OnSearchKeyUp" />
+            </MudItem>
+            <MudItem xs="12" md="6">
+                <MudButton Variant="Variant.Filled" 
+                           Color="Color.Primary" 
+                           OnClick="SearchActivities"
+                           StartIcon="@Icons.Material.Filled.Search">
+                    Search
+                </MudButton>
+                <MudButton Variant="Variant.Outlined" 
+                           Color="Color.Default" 
+                           OnClick="ClearFilters"
+                           StartIcon="@Icons.Material.Filled.Clear"
+                           Class="ml-2">
+                    Clear
+                </MudButton>
+            </MudItem>
+        </MudGrid>
+    </MudPaper>
+
+    @if (_loading)
+    {
+        <MudProgressCircular Color="Color.Primary" Indeterminate="true" />
+    }
+    else if (_result == null || !_result.Items.Any())
+    {
+        <MudAlert Severity="Severity.Info">No activities found. Try adjusting your search criteria.</MudAlert>
+    }
+    else
+    {
+        <MudGrid>
+            @foreach (var activity in _result.Items)
+            {
+                <MudItem xs="12" sm="6" md="4">
+                    <MudCard Class="activity-card" Style="height: 100%;">
+                        <MudCardHeader>
+                            <CardHeaderContent>
+                                <MudText Typo="Typo.h6">@activity.Name</MudText>
+                                <MudChip T="string" Size="Size.Small" Color="Color.Primary" Text="@activity.ActivityTypeName" />
+                            </CardHeaderContent>
+                        </MudCardHeader>
+                        <MudCardContent>
+                            <MudText Typo="Typo.body2" Class="mb-2">
+                                @(activity.Description.Length > 150 
+                                    ? activity.Description.Substring(0, 150) + "..." 
+                                    : activity.Description)
+                            </MudText>
+                            @if (activity.DifficultyName != null)
+                            {
+                                <MudChip T="string" Size="Size.Small" Color="Color.Secondary" Text="@activity.DifficultyName" />
+                            }
+                            @if (activity.MinPlayers.HasValue || activity.MaxPlayers.HasValue)
+                            {
+                                <MudChip T="string" Size="Size.Small" Icon="@Icons.Material.Filled.People" Text="@GetPlayerCountText(activity.MinPlayers, activity.MaxPlayers)" />
+                            }
+                        </MudCardContent>
+                        <MudCardActions>
+                            <MudButton Variant="Variant.Text" 
+                                       Color="Color.Primary" 
+                                       OnClick="@(() => ViewActivity(activity.Id))">
+                                View Details
+                            </MudButton>
+                        </MudCardActions>
+                    </MudCard>
+                </MudItem>
+            }
+        </MudGrid>
+
+        @if (_result.TotalPages > 1)
+        {
+            <MudPagination Class="mt-4" 
+                           Count="_result.TotalPages" 
+                           Selected="_filter.PageNumber" 
+                           SelectedChanged="OnPageChanged" 
+                           Color="Color.Primary" />
+        }
+    }
+</MudContainer>
+
+@code {
+    private PagedResult<ActivityDto>? _result;
+    private ActivityFilterDto _filter = new();
+    private bool _loading = true;
+
+    protected override async Task OnInitializedAsync()
+    {
+        await LoadActivities();
+    }
+
+    private async Task LoadActivities()
+    {
+        _loading = true;
+        try
+        {
+            _result = await ApiClient.GetActivitiesAsync(_filter);
+        }
+        catch (Exception ex)
+        {
+            Logger.LogError(ex, "Error loading activities");
+        }
+        finally
+        {
+            _loading = false;
+        }
+    }
+
+    private async Task SearchActivities()
+    {
+        _filter.PageNumber = 1;
+        await LoadActivities();
+    }
+
+    private async Task ClearFilters()
+    {
+        _filter = new ActivityFilterDto();
+        await LoadActivities();
+    }
+
+    private async Task OnPageChanged(int page)
+    {
+        _filter.PageNumber = page;
+        await LoadActivities();
+    }
+
+    private async Task OnSearchKeyUp(KeyboardEventArgs e)
+    {
+        if (e.Key == "Enter")
+        {
+            await SearchActivities();
+        }
+    }
+
+    private void ViewActivity(int id)
+    {
+        Navigation.NavigateTo($"/activities/{id}");
+    }
+
+    private static string GetPlayerCountText(int? min, int? max)
+    {
+        if (min.HasValue && max.HasValue)
+            return $"{min}-{max} players";
+        if (min.HasValue)
+            return $"{min}+ players";
+        if (max.HasValue)
+            return $"up to {max} players";
+        return "Any";
+    }
+}
