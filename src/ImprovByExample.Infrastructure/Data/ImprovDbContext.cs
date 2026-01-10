@@ -13,6 +13,8 @@ public class ImprovDbContext : IdentityDbContext<ApplicationUser>
     public DbSet<ImprovActivity> Activities { get; set; } = null!;
     public DbSet<ActivityType> ActivityTypes { get; set; } = null!;
     public DbSet<ActivitySource> ActivitySources { get; set; } = null!;
+    public DbSet<SourceType> SourceTypes { get; set; } = null!;
+    public DbSet<VideoPlatform> VideoPlatforms { get; set; } = null!;
     public DbSet<Difficulty> Difficulties { get; set; } = null!;
     public DbSet<RelationshipType> RelationshipTypes { get; set; } = null!;
     public DbSet<ExternalVideoReference> VideoReferences { get; set; } = null!;
@@ -74,6 +76,29 @@ public class ImprovDbContext : IdentityDbContext<ApplicationUser>
             entity.Property(e => e.AffiliateUrl).HasMaxLength(500);
             entity.Property(e => e.Isbn).HasMaxLength(20);
             entity.Property(e => e.CreatedById).IsRequired();
+
+            entity.HasOne(e => e.SourceType)
+                .WithMany(st => st.ActivitySources)
+                .HasForeignKey(e => e.SourceTypeId)
+                .OnDelete(DeleteBehavior.Restrict);
+        });
+
+        // Configure SourceType
+        builder.Entity<SourceType>(entity =>
+        {
+            entity.HasKey(e => e.Id);
+            entity.Property(e => e.Name).IsRequired().HasMaxLength(50);
+            entity.Property(e => e.Description).IsRequired().HasMaxLength(500);
+            entity.Property(e => e.CreatedById).IsRequired();
+        });
+
+        // Configure VideoPlatform
+        builder.Entity<VideoPlatform>(entity =>
+        {
+            entity.HasKey(e => e.Id);
+            entity.Property(e => e.Name).IsRequired().HasMaxLength(50);
+            entity.Property(e => e.Description).IsRequired().HasMaxLength(500);
+            entity.Property(e => e.CreatedById).IsRequired();
         });
 
         // Configure Difficulty
@@ -107,6 +132,11 @@ public class ImprovDbContext : IdentityDbContext<ApplicationUser>
                 .WithMany(a => a.VideoReferences)
                 .HasForeignKey(e => e.ActivityId)
                 .OnDelete(DeleteBehavior.Cascade);
+
+            entity.HasOne(e => e.VideoPlatform)
+                .WithMany(vp => vp.VideoReferences)
+                .HasForeignKey(e => e.VideoPlatformId)
+                .OnDelete(DeleteBehavior.Restrict);
         });
 
         // Configure VideoTimestamp

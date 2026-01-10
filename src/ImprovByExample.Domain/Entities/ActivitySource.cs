@@ -1,11 +1,10 @@
 using ImprovByExample.Domain.Common;
-using ImprovByExample.Domain.Enums;
 
 namespace ImprovByExample.Domain.Entities;
 
 public class ActivitySource : BaseEntity
 {
-    public SourceType SourceType { get; set; }
+    public int SourceTypeId { get; set; }
     public string Name { get; set; } = string.Empty;
     public string? Author { get; set; }
     public string? Url { get; set; }
@@ -15,5 +14,6 @@ public class ActivitySource : BaseEntity
     public string? Description { get; set; }
     
     // Navigation properties
+    public SourceType SourceType { get; set; } = null!;
     public ICollection<ImprovActivity> Activities { get; set; } = new List<ImprovActivity>();
 }

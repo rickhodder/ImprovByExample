@@ -1,5 +1,4 @@
 using ImprovByExample.Domain.Entities;
-using ImprovByExample.Domain.Enums;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.DependencyInjection;
@@ -25,6 +24,8 @@ public static class DataSeeder
         var adminUser = await SeedAdminUserAsync(userManager);
 
         // Seed Lookup Data
+        await SeedSourceTypesAsync(context, adminUser.Id);
+        await SeedVideoPlatformsAsync(context, adminUser.Id);
         await SeedActivityTypesAsync(context, adminUser.Id);
         await SeedDifficultiesAsync(context, adminUser.Id);
         await SeedRelationshipTypesAsync(context, adminUser.Id);
@@ -208,16 +209,126 @@ public static class DataSeeder
         await context.RelationshipTypes.AddRangeAsync(relationshipTypes);
     }
 
+    private static async Task SeedSourceTypesAsync(ImprovDbContext context, string userId)
+    {
+        if (await context.SourceTypes.AnyAsync())
+            return;
+
+        var sourceTypes = new[]
+        {
+            new SourceType
+            {
+                Name = "Book",
+                Description = "Published books and texts on improvisation",
+                IsActive = true,
+                CreatedById = userId,
+                CreatedAt = DateTime.UtcNow,
+                UpdatedAt = DateTime.UtcNow
+            },
+            new SourceType
+            {
+                Name = "Website",
+                Description = "Online resources and websites",
+                IsActive = true,
+                CreatedById = userId,
+                CreatedAt = DateTime.UtcNow,
+                UpdatedAt = DateTime.UtcNow
+            },
+            new SourceType
+            {
+                Name = "Workshop",
+                Description = "Activities from improv workshops",
+                IsActive = true,
+                CreatedById = userId,
+                CreatedAt = DateTime.UtcNow,
+                UpdatedAt = DateTime.UtcNow
+            },
+            new SourceType
+            {
+                Name = "Class",
+                Description = "Activities from improv classes",
+                IsActive = true,
+                CreatedById = userId,
+                CreatedAt = DateTime.UtcNow,
+                UpdatedAt = DateTime.UtcNow
+            },
+            new SourceType
+            {
+                Name = "Person",
+                Description = "Activities attributed to specific individuals",
+                IsActive = true,
+                CreatedById = userId,
+                CreatedAt = DateTime.UtcNow,
+                UpdatedAt = DateTime.UtcNow
+            },
+            new SourceType
+            {
+                Name = "Original",
+                Description = "Original content created for this platform",
+                IsActive = true,
+                CreatedById = userId,
+                CreatedAt = DateTime.UtcNow,
+                UpdatedAt = DateTime.UtcNow
+            }
+        };
+
+        await context.SourceTypes.AddRangeAsync(sourceTypes);
+    }
+
+    private static async Task SeedVideoPlatformsAsync(ImprovDbContext context, string userId)
+    {
+        if (await context.VideoPlatforms.AnyAsync())
+            return;
+
+        var platforms = new[]
+        {
+            new VideoPlatform
+            {
+                Name = "YouTube",
+                Description = "Videos hosted on YouTube",
+                IsActive = true,
+                CreatedById = userId,
+                CreatedAt = DateTime.UtcNow,
+                UpdatedAt = DateTime.UtcNow
+            },
+            new VideoPlatform
+            {
+                Name = "Vimeo",
+                Description = "Videos hosted on Vimeo",
+                IsActive = true,
+                CreatedById = userId,
+                CreatedAt = DateTime.UtcNow,
+                UpdatedAt = DateTime.UtcNow
+            },
+            new VideoPlatform
+            {
+                Name = "Other",
+                Description = "Videos from other platforms",
+                IsActive = true,
+                CreatedById = userId,
+                CreatedAt = DateTime.UtcNow,
+                UpdatedAt = DateTime.UtcNow
+            }
+        };
+
+        await context.VideoPlatforms.AddRangeAsync(platforms);
+    }
+
     private static async Task SeedActivitySourcesAsync(ImprovDbContext context, string userId)
     {
         if (await context.ActivitySources.AnyAsync())
             return;
 
+        // Get the seeded source types
+        var bookType = await context.SourceTypes.FirstAsync(st => st.Name == "Book");
+        var websiteType = await context.SourceTypes.FirstAsync(st => st.Name == "Website");
+        var originalType = await context.SourceTypes.FirstAsync(st => st.Name == "Original");
+
         var sources = new[]
         {
             new ActivitySource
             {
-                SourceType = SourceType.Book,
+                SourceTypeId = bookType.Id,
                 Name = "Impro: Improvisation and the Theatre",
                 Author = "Keith Johnstone",
                 Isbn = "978-0878301178",
@@ -229,7 +340,7 @@ public static class DataSeeder
             },
             new ActivitySource
             {
-                SourceType = SourceType.Book,
+                SourceTypeId = bookType.Id,
                 Name = "Truth in Comedy",
                 Author = "Charna Halpern, Del Close, Kim Johnson",
                 Isbn = "978-1566080033",
@@ -241,7 +352,7 @@ public static class DataSeeder
             },
             new ActivitySource
             {
-                SourceType = SourceType.Website,
+                SourceTypeId = websiteType.Id,
                 Name = "Improv Encyclopedia",
                 Url = "https://improvencyclopedia.org",
                 Description = "Comprehensive online database of improv games and exercises",
@@ -251,7 +362,7 @@ public static class DataSeeder
             },
             new ActivitySource
             {
-                SourceType = SourceType.Original,
+                SourceTypeId = originalType.Id,
                 Name = "ImprovByExample Original",
                 Description = "Activities created specifically for this platform",
                 CreatedById = userId,
