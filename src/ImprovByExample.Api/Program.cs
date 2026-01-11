@@ -65,7 +65,29 @@ builder.Services.AddIdentity<ApplicationUser, IdentityRole>(options =>
 .AddDefaultTokenProviders();
 
 // Add authentication and authorization
-builder.Services.AddAuthentication();
+builder.Services.AddAuthentication(IdentityConstants.ApplicationScheme)
+    .AddIdentityCookies(options =>
+    {
+        options.ApplicationCookie!.Configure(cookieOptions =>
+        {
+            cookieOptions.Cookie.Name = ".ImprovByExample.Auth";
+            cookieOptions.Cookie.HttpOnly = true;
+            cookieOptions.Cookie.SecurePolicy = CookieSecurePolicy.Always;
+            cookieOptions.ExpireTimeSpan = TimeSpan.FromHours(24);
+            cookieOptions.SlidingExpiration = true;
+            cookieOptions.Events.OnRedirectToLogin = context =>
+            {
+                context.Response.StatusCode = 401;
+                return Task.CompletedTask;
+            };
+            cookieOptions.Events.OnRedirectToAccessDenied = context =>
+            {
+                context.Response.StatusCode = 403;
+                return Task.CompletedTask;
+            };
+        });
+    });
+
 builder.Services.AddAuthorization();
 
 // Add repositories
