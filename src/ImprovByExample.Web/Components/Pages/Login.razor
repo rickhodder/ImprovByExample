@@ -4,6 +4,7 @@
 @inject IAuthService AuthService
 @inject NavigationManager Navigation
 @inject ISnackbar Snackbar
+@inject ILogger<Login> Logger
 
 <PageTitle>Login - Improv By Example</PageTitle>
 
@@ -113,7 +114,7 @@
         catch (Exception ex)
         {
             _errorMessage = "An error occurred during login. Please try again.";
-            Console.WriteLine($"Login error: {ex.Message}");
+            Logger.LogError(ex, "Login error for email: {Email}", _model.Email);
         }
         finally
         {

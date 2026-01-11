@@ -4,6 +4,7 @@
 @inject IAuthService AuthService
 @inject NavigationManager Navigation
 @inject ISnackbar Snackbar
+@inject ILogger<Register> Logger
 
 <PageTitle>Register - Improv By Example</PageTitle>
 
@@ -131,7 +132,7 @@
         catch (Exception ex)
         {
             _errorMessage = "An error occurred during registration. Please try again.";
-            Console.WriteLine($"Registration error: {ex.Message}");
+            Logger.LogError(ex, "Registration error for email: {Email}", _model.Email);
         }
         finally
         {

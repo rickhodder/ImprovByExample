@@ -3,6 +3,7 @@
 @inject IAuthService AuthService
 @inject NavigationManager Navigation
 @inject ISnackbar Snackbar
+@inject ILogger<LoginDisplay> Logger
 
 <MudMenu Icon="@Icons.Material.Filled.AccountCircle" 
          Color="Color.Inherit" 
@@ -62,7 +63,7 @@
         }
         catch (Exception ex)
         {
-            Console.WriteLine($"Error loading current user: {ex.Message}");
+            Logger.LogError(ex, "Error loading current user");
             _currentUser = null;
         }
     }

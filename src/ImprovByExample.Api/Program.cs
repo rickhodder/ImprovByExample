@@ -73,7 +73,10 @@ builder.Services.AddAuthentication(IdentityConstants.ApplicationScheme)
         {
             cookieOptions.Cookie.Name = ".ImprovByExample.Auth";
             cookieOptions.Cookie.HttpOnly = true;
-            cookieOptions.Cookie.SecurePolicy = CookieSecurePolicy.Always;
+            // Use SameAsRequest for development, Always for production
+            cookieOptions.Cookie.SecurePolicy = builder.Environment.IsDevelopment() 
+                ? CookieSecurePolicy.SameAsRequest 
+                : CookieSecurePolicy.Always;
             cookieOptions.ExpireTimeSpan = TimeSpan.FromHours(24);
             cookieOptions.SlidingExpiration = true;
             cookieOptions.Events.OnRedirectToLogin = context =>

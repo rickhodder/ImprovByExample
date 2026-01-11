@@ -42,7 +42,10 @@ builder.Services.AddMudServices();
 // Configure HttpClient for API calls
 var apiBaseUrl = builder.Configuration["ApiSettings:BaseUrl"] ?? "http://localhost:5273";
 
-// Configure HttpClient for ApiClient with cookie support
+// Create a shared cookie container to maintain authentication state across all API calls
+var sharedCookieContainer = new System.Net.CookieContainer();
+
+// Configure HttpClient for ApiClient with shared cookie container
 builder.Services.AddHttpClient<ApiClient>(client =>
 {
     client.BaseAddress = new Uri(apiBaseUrl);
@@ -51,10 +54,10 @@ builder.Services.AddHttpClient<ApiClient>(client =>
 .ConfigurePrimaryHttpMessageHandler(() => new HttpClientHandler
 {
     UseCookies = true,
-    CookieContainer = new System.Net.CookieContainer()
+    CookieContainer = sharedCookieContainer
 });
 
-// Configure HttpClient for AuthService with cookie support
+// Configure HttpClient for AuthService with shared cookie container
 builder.Services.AddHttpClient<IAuthService, AuthService>(client =>
 {
     client.BaseAddress = new Uri(apiBaseUrl);
@@ -63,7 +66,7 @@ builder.Services.AddHttpClient<IAuthService, AuthService>(client =>
 .ConfigurePrimaryHttpMessageHandler(() => new HttpClientHandler
 {
     UseCookies = true,
-    CookieContainer = new System.Net.CookieContainer()
+    CookieContainer = sharedCookieContainer
 });
 
 var app = builder.Build();
