@@ -1720,6 +1720,175 @@ These are detailed technical implementation phases for building the foundation (
 
 ---
 
+### MVP Phase 8.5: Authentication Implementation ⬜ NOT STARTED
+**Status:** ⬜ Not Started (Currently using temporary workaround)  
+**Goal:** Implement complete user authentication flow for Web and API
+
+**Current State:**
+- ✅ ASP.NET Core Identity configured (Phase 5)
+- ✅ Roles and admin user seeded
+- ⚠️ **Temporary workaround in place:** API controllers use `[AllowAnonymous]` and default to "system" user ID
+- ❌ No login/registration UI
+- ❌ No authentication between Web and API
+
+**Authentication Checklist:**
+
+**1. Remove Temporary Workarounds** ⬜
+   - [ ] Remove `[AllowAnonymous]` from Create/Update/Delete endpoints in ActivitiesController.cs
+   - [ ] Restore `[Authorize(Roles = "Admin")]` attributes
+   - [ ] Remove `?? "system"` fallback in userId checks (lines 111, 151 in ActivitiesController.cs)
+   - [ ] Remove temporary logging statements for system user
+   - [ ] Update all other controllers that may have similar workarounds
+
+**2. Configure Cookie Authentication Between API and Web** ⬜
+   - [ ] Install Microsoft.AspNetCore.Authentication.Cookies in both API and Web projects
+   - [ ] Configure cookie authentication in API Program.cs:
+     ```csharp
+     builder.Services.AddAuthentication(CookieAuthenticationDefaults.AuthenticationScheme)
+         .AddCookie(options =>
+         {
+             options.Cookie.Name = ".ImprovByExample.Auth";
+             options.Cookie.HttpOnly = true;
+             options.Cookie.SecurePolicy = CookieSecurePolicy.Always;
+             options.ExpireTimeSpan = TimeSpan.FromHours(24);
+             options.SlidingExpiration = true;
+             options.Events.OnRedirectToLogin = context =>
+             {
+                 context.Response.StatusCode = 401;
+                 return Task.CompletedTask;
+             };
+         });
+     ```
+   - [ ] Configure cookie authentication in Web Program.cs (similar configuration)
+   - [ ] Ensure both apps use the same cookie name and settings
+   - [ ] Add `app.UseAuthentication()` and `app.UseAuthorization()` to both middleware pipelines
+
+**3. Create Authentication API Endpoints** ⬜
+   - [ ] Create AuthController.cs in API project
+   - [ ] Create RegisterDto (Email, Password, ConfirmPassword, FirstName, LastName)
+   - [ ] Create LoginDto (Email, Password, RememberMe)
+   - [ ] Create RegisterDto and LoginDto validators with FluentValidation
+   - [ ] Implement POST /api/auth/register endpoint:
+     - [ ] Validate input
+     - [ ] Create user with UserManager
+     - [ ] Assign "StandardUser" role by default
+     - [ ] Sign in user and return success
+   - [ ] Implement POST /api/auth/login endpoint:
+     - [ ] Validate credentials with SignInManager
+     - [ ] Set authentication cookie
+     - [ ] Return user info (Id, Email, Roles)
+   - [ ] Implement POST /api/auth/logout endpoint:
+     - [ ] Clear authentication cookie
+     - [ ] Sign out user
+   - [ ] Implement GET /api/auth/user endpoint:
+     - [ ] Return current authenticated user info
+     - [ ] Return 401 if not authenticated
+   - [ ] Write unit tests for Auth validators
+   - [ ] Write integration tests for Auth endpoints
+
+**4. Create Authentication Service in Web App** ⬜
+   - [ ] Create IAuthService interface in Web/Services
+   - [ ] Create AuthService implementation:
+     - [ ] RegisterAsync(RegisterDto) → calls API /api/auth/register
+     - [ ] LoginAsync(LoginDto) → calls API /api/auth/login
+     - [ ] LogoutAsync() → calls API /api/auth/logout
+     - [ ] GetCurrentUserAsync() → calls API /api/auth/user
+   - [ ] Register AuthService in Web Program.cs DI container
+   - [ ] Configure HttpClient to include cookies with API calls
+
+**5. Create Login Page (Blazor)** ⬜
+   - [ ] Create Components/Pages/Login.razor
+   - [ ] Add MudForm with email and password fields
+   - [ ] Add "Remember Me" checkbox
+   - [ ] Add validation using FluentValidation
+   - [ ] Call AuthService.LoginAsync() on submit
+   - [ ] Redirect to home page on success
+   - [ ] Display error messages on failure
+   - [ ] Add "Forgot Password?" link (placeholder for future)
+   - [ ] Add "Register" link to registration page
+   - [ ] Style with MudBlazor components
+
+**6. Create Registration Page (Blazor)** ⬜
+   - [ ] Create Components/Pages/Register.razor
+   - [ ] Add MudForm with fields: Email, Password, Confirm Password, First Name, Last Name
+   - [ ] Add client-side validation
+   - [ ] Call AuthService.RegisterAsync() on submit
+   - [ ] Auto-login after successful registration
+   - [ ] Redirect to home page
+   - [ ] Display error messages (email already exists, password requirements, etc.)
+   - [ ] Add "Already have an account? Login" link
+   - [ ] Style with MudBlazor components
+
+**7. Add Authentication UI Components** ⬜
+   - [ ] Create LoginDisplay.razor component for MainLayout
+   - [ ] Show "Login" and "Register" buttons when not authenticated
+   - [ ] Show user name and "Logout" button when authenticated
+   - [ ] Add user menu dropdown with:
+     - [ ] Profile link (future)
+     - [ ] Logout button
+   - [ ] Update MainLayout.razor to include LoginDisplay
+   - [ ] Add AuthorizeView components to conditionally show admin features
+   - [ ] Protect admin routes (redirect to login if not authenticated)
+
+**8. Implement Current User Context** ⬜
+   - [ ] Create ICurrentUserService interface in Application
+   - [ ] Implement CurrentUserService in Infrastructure:
+     - [ ] Inject IHttpContextAccessor
+     - [ ] Read UserId from User.FindFirst(ClaimTypes.NameIdentifier)
+     - [ ] Cache user info for request lifetime
+   - [ ] Register CurrentUserService in API Program.cs
+   - [ ] Update services to use ICurrentUserService instead of direct User access
+   - [ ] Update audit fields to use ICurrentUserService
+
+**9. Update Activity Management for Authenticated Users** ⬜
+   - [ ] Update ApiClient in Web to handle 401 responses
+   - [ ] Redirect to login page on 401
+   - [ ] Show "Login Required" message for admin actions
+   - [ ] Hide "Add Activity" button if not authenticated as admin
+   - [ ] Test activity creation with authenticated admin user
+   - [ ] Test activity creation blocked for non-admin users
+
+**10. Testing** ⬜
+   - [ ] Write unit tests for AuthController
+   - [ ] Write integration tests for authentication flow:
+     - [ ] Register new user → Login → Access protected endpoint
+     - [ ] Login with invalid credentials → Expect 401
+     - [ ] Access admin endpoint as StandardUser → Expect 403
+     - [ ] Access admin endpoint as Admin → Expect success
+   - [ ] Manual testing of full authentication flow
+   - [ ] Test cookie expiration and renewal
+   - [ ] Test logout clears authentication
+
+**11. Security Hardening** ⬜
+   - [ ] Enable HTTPS redirect in production
+   - [ ] Configure CORS properly if Web and API on different domains
+   - [ ] Add anti-forgery token support
+   - [ ] Configure rate limiting on auth endpoints (prevent brute force)
+   - [ ] Add account lockout after failed login attempts (already configured in Identity)
+   - [ ] Log authentication events (login, logout, failed attempts)
+
+**Deliverables:**
+- Authentication API endpoints (register, login, logout, get user)
+- AuthService for Web app
+- Login and Registration Blazor pages
+- LoginDisplay component in MainLayout
+- Current user context throughout application
+- All temporary workarounds removed
+- Comprehensive authentication tests
+- Security hardening measures
+
+**Success Criteria:**
+- ✅ Users can register new accounts
+- ✅ Users can login with email/password
+- ✅ Authentication cookies work between Web and API
+- ✅ Admin users can create/edit/delete activities
+- ✅ Non-admin users cannot access admin endpoints (403 Forbidden)
+- ✅ Unauthenticated users are redirected to login for protected actions
+- ✅ All tests pass
+- ✅ No temporary workarounds remain in code
+
+---
+
 ### MVP Phase 9: Data Seeding & Testing 🔄 PARTIALLY COMPLETED
 **Status:** 🔄 Partially Completed (Seeding done, comprehensive testing needed)  
 **Goal:** Seed initial data and complete testing
