@@ -22,14 +22,14 @@
                 </MudItem>
 
                 <MudItem xs="12" md="6">
-                    <MudSelect @bind-Value="_activity.ActivityTypeId" 
+                    <MudSelect T="int" @bind-Value="_activity.ActivityTypeId" 
                                Label="Activity Type" 
                                Required="true"
                                Variant="Variant.Outlined">
-                        <MudSelectItem Value="1">Game</MudSelectItem>
-                        <MudSelectItem Value="2">Warmup</MudSelectItem>
-                        <MudSelectItem Value="3">Technique</MudSelectItem>
-                        <MudSelectItem Value="4">Exercise</MudSelectItem>
+                        <MudSelectItem T="int" Value="1">Game</MudSelectItem>
+                        <MudSelectItem T="int" Value="2">Warmup</MudSelectItem>
+                        <MudSelectItem T="int" Value="3">Technique</MudSelectItem>
+                        <MudSelectItem T="int" Value="4">Exercise</MudSelectItem>
                     </MudSelect>
                 </MudItem>
 
@@ -125,7 +125,10 @@
 </MudContainer>
 
 @code {
-    private CreateActivityDto _activity = new();
+    private CreateActivityDto _activity = new() 
+    { 
+        ActivityTypeId = 1 // Default to "Game"
+    };
     private string _tagsInput = string.Empty;
     private bool _saving = false;
 

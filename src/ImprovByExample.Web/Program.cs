@@ -40,15 +40,12 @@ builder.Services.AddRazorComponents()
 builder.Services.AddMudServices();
 
 // Configure HttpClient for API calls
-var apiBaseUrl = builder.Configuration["ApiSettings:BaseUrl"] ?? "http://localhost:5001";
+var apiBaseUrl = builder.Configuration["ApiSettings:BaseUrl"] ?? "http://localhost:5273";
 builder.Services.AddHttpClient<ApiClient>(client =>
 {
     client.BaseAddress = new Uri(apiBaseUrl);
     client.Timeout = TimeSpan.FromSeconds(30);
 });
-
-// Register services
-builder.Services.AddScoped<ApiClient>();
 
 var app = builder.Build();
 
