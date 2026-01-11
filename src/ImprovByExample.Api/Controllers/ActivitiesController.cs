@@ -4,7 +4,6 @@ using ImprovByExample.Application.Common.Models.DTOs;
 using ImprovByExample.Application.Common.Models.Responses;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
-using System.Security.Claims;
 
 namespace ImprovByExample.Api.Controllers;
 
@@ -16,6 +15,7 @@ namespace ImprovByExample.Api.Controllers;
 public class ActivitiesController : ControllerBase
 {
     private readonly IActivityService _activityService;
+    private readonly ICurrentUserService _currentUserService;
     private readonly IValidator<CreateActivityDto> _createValidator;
     private readonly IValidator<UpdateActivityDto> _updateValidator;
     private readonly IValidator<ActivityFilterDto> _filterValidator;
@@ -23,12 +23,14 @@ public class ActivitiesController : ControllerBase
 
     public ActivitiesController(
         IActivityService activityService,
+        ICurrentUserService currentUserService,
         IValidator<CreateActivityDto> createValidator,
         IValidator<UpdateActivityDto> updateValidator,
         IValidator<ActivityFilterDto> filterValidator,
         ILogger<ActivitiesController> logger)
     {
         _activityService = activityService;
+        _currentUserService = currentUserService;
         _createValidator = createValidator;
         _updateValidator = updateValidator;
         _filterValidator = filterValidator;
@@ -90,7 +92,7 @@ public class ActivitiesController : ControllerBase
     /// <param name="cancellationToken">Cancellation token</param>
     /// <returns>Created activity</returns>
     [HttpPost]
-    [AllowAnonymous] // TODO: Change back to [Authorize(Roles = "Admin")] after implementing authentication
+    [Authorize(Roles = "Admin")]
     [ProducesResponseType(typeof(ActivityDto), StatusCodes.Status201Created)]
     [ProducesResponseType(StatusCodes.Status400BadRequest)]
     [ProducesResponseType(StatusCodes.Status401Unauthorized)]
@@ -107,11 +109,11 @@ public class ActivitiesController : ControllerBase
             return BadRequest(validationResult.Errors);
         }
 
-        // TODO: Re-enable authentication check after implementing auth
-        var userId = User.FindFirst(ClaimTypes.NameIdentifier)?.Value ?? "system";
-        if (userId == "system")
+        var userId = _currentUserService.UserId;
+        if (string.IsNullOrEmpty(userId))
         {
-            _logger.LogInformation("CreateActivity called without authenticated user, using system ID for testing");
+            _logger.LogWarning("CreateActivity called but userId is null");
+            return Unauthorized(new { message = "User authentication required." });
         }
 
         var created = await _activityService.CreateActivityAsync(dto, userId, cancellationToken);
@@ -130,7 +132,7 @@ public class ActivitiesController : ControllerBase
     /// <param name="cancellationToken">Cancellation token</param>
     /// <returns>Updated activity</returns>
     [HttpPut("{id}")]
-    [AllowAnonymous] // TODO: Change back to [Authorize(Roles = "Admin")] after implementing authentication
+    [Authorize(Roles = "Admin")]
     [ProducesResponseType(typeof(ActivityDto), StatusCodes.Status200OK)]
     [ProducesResponseType(StatusCodes.Status400BadRequest)]
     [ProducesResponseType(StatusCodes.Status401Unauthorized)]
@@ -155,11 +157,11 @@ public class ActivitiesController : ControllerBase
             return BadRequest(validationResult.Errors);
         }
 
-        // TODO: Re-enable authentication check after implementing auth
-        var userId = User.FindFirst(ClaimTypes.NameIdentifier)?.Value ?? "system";
-        if (userId == "system")
+        var userId = _currentUserService.UserId;
+        if (string.IsNullOrEmpty(userId))
         {
-            _logger.LogInformation("UpdateActivity called without authenticated user, using system ID for testing");
+            _logger.LogWarning("UpdateActivity called but userId is null");
+            return Unauthorized(new { message = "User authentication required." });
         }
 
         var updated = await _activityService.UpdateActivityAsync(dto, userId, cancellationToken);
@@ -179,7 +181,7 @@ public class ActivitiesController : ControllerBase
     /// <param name="cancellationToken">Cancellation token</param>
     /// <returns>No content on success</returns>
     [HttpDelete("{id}")]
-    [AllowAnonymous] // TODO: Change back to [Authorize(Roles = "Admin")] after implementing authentication
+    [Authorize(Roles = "Admin")]
     [ProducesResponseType(StatusCodes.Status204NoContent)]
     [ProducesResponseType(StatusCodes.Status401Unauthorized)]
     [ProducesResponseType(StatusCodes.Status403Forbidden)]

@@ -5,6 +5,7 @@ using ImprovByExample.Application.Services;
 using ImprovByExample.Infrastructure.Data;
 using ImprovByExample.Infrastructure.Data.Seed;
 using ImprovByExample.Infrastructure.Repositories;
+using ImprovByExample.Infrastructure.Services;
 using ImprovByExample.Domain.Entities;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
@@ -96,6 +97,8 @@ builder.Services.AddScoped(typeof(IRepository<>), typeof(Repository<>));
 
 // Add services
 builder.Services.AddScoped<IActivityService, ActivityService>();
+builder.Services.AddScoped<ICurrentUserService, CurrentUserService>();
+builder.Services.AddScoped<ICurrentUserService, CurrentUserService>();
 
 // Add FluentValidation
 builder.Services.AddValidatorsFromAssemblyContaining<IActivityService>();
