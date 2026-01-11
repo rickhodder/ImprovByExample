@@ -1,0 +1,185 @@
+@page "/admin/activities"
+@using ImprovByExample.Application.Common.Models.DTOs
+@using ImprovByExample.Application.Common.Models.Responses
+@using ImprovByExample.Web.Services
+@inject ApiClient ApiClient
+@inject NavigationManager Navigation
+@inject ISnackbar Snackbar
+@inject ILogger<ManageActivities> Logger
+
+<PageTitle>Manage Activities - Admin</PageTitle>
+
+<MudContainer MaxWidth="MaxWidth.ExtraLarge" Class="mt-4">
+    <MudText Typo="Typo.h4" GutterBottom="true">Manage Activities</MudText>
+    <MudText Typo="Typo.body1" Class="mb-4">
+        Add, edit, or delete activities in the database.
+    </MudText>
+
+    <MudButton Variant="Variant.Filled" 
+               Color="Color.Primary" 
+               StartIcon="@Icons.Material.Filled.Add"
+               OnClick="@(() => Navigation.NavigateTo("/admin/activities/add"))"
+               Class="mb-4">
+        Add New Activity
+    </MudButton>
+
+    @if (_loading)
+    {
+        <MudProgressCircular Color="Color.Primary" Indeterminate="true" />
+    }
+    else if (_result == null || !_result.Items.Any())
+    {
+        <MudAlert Severity="Severity.Info">No activities found.</MudAlert>
+    }
+    else
+    {
+        <MudTable Items="_result.Items" Hover="true" Striped="true">
+            <HeaderContent>
+                <MudTh>ID</MudTh>
+                <MudTh>Name</MudTh>
+                <MudTh>Type</MudTh>
+                <MudTh>Difficulty</MudTh>
+                <MudTh>Players</MudTh>
+                <MudTh>Actions</MudTh>
+            </HeaderContent>
+            <RowTemplate>
+                <MudTd DataLabel="ID">@context.Id</MudTd>
+                <MudTd DataLabel="Name">@context.Name</MudTd>
+                <MudTd DataLabel="Type">@context.ActivityTypeName</MudTd>
+                <MudTd DataLabel="Difficulty">@(context.DifficultyName ?? "N/A")</MudTd>
+                <MudTd DataLabel="Players">@GetPlayerCountText(context.MinPlayers, context.MaxPlayers)</MudTd>
+                <MudTd DataLabel="Actions">
+                    <MudButtonGroup Variant="Variant.Outlined" Size="Size.Small">
+                        <MudButton Color="Color.Info" 
+                                   StartIcon="@Icons.Material.Filled.Visibility"
+                                   OnClick="@(() => Navigation.NavigateTo($"/activities/{context.Id}"))">
+                            View
+                        </MudButton>
+                        <MudButton Color="Color.Primary" 
+                                   StartIcon="@Icons.Material.Filled.Edit"
+                                   OnClick="@(() => Navigation.NavigateTo($"/admin/activities/edit/{context.Id}"))">
+                            Edit
+                        </MudButton>
+                        <MudButton Color="Color.Error" 
+                                   StartIcon="@Icons.Material.Filled.Delete"
+                                   OnClick="@(() => ShowDeleteDialog(context))">
+                            Delete
+                        </MudButton>
+                    </MudButtonGroup>
+                </MudTd>
+            </RowTemplate>
+            <PagerContent>
+                <MudTablePager />
+            </PagerContent>
+        </MudTable>
+
+        @if (_result.TotalPages > 1)
+        {
+            <MudPagination Class="mt-4" 
+                           Count="_result.TotalPages" 
+                           Selected="_filter.PageNumber" 
+                           SelectedChanged="OnPageChanged" 
+                           Color="Color.Primary" />
+        }
+    }
+</MudContainer>
+
+<MudDialog @bind-Visible="_deleteDialogVisible">
+    <DialogContent>
+        <MudText>Are you sure you want to delete the activity "@_activityToDelete?.Name"?</MudText>
+        <MudText Typo="Typo.body2" Color="Color.Error">This action cannot be undone.</MudText>
+    </DialogContent>
+    <DialogActions>
+        <MudButton OnClick="CancelDelete">Cancel</MudButton>
+        <MudButton Color="Color.Error" Variant="Variant.Filled" OnClick="ConfirmDelete">Delete</MudButton>
+    </DialogActions>
+</MudDialog>
+
+@code {
+    private PagedResult<ActivityDto>? _result;
+    private ActivityFilterDto _filter = new();
+    private bool _loading = true;
+    private bool _deleteDialogVisible = false;
+    private ActivityDto? _activityToDelete;
+
+    protected override async Task OnInitializedAsync()
+    {
+        await LoadActivities();
+    }
+
+    private async Task LoadActivities()
+    {
+        _loading = true;
+        try
+        {
+            _result = await ApiClient.GetActivitiesAsync(_filter);
+        }
+        catch (Exception ex)
+        {
+            Logger.LogError(ex, "Error loading activities");
+            Snackbar.Add("Error loading activities", Severity.Error);
+        }
+        finally
+        {
+            _loading = false;
+        }
+    }
+
+    private async Task OnPageChanged(int page)
+    {
+        _filter.PageNumber = page;
+        await LoadActivities();
+    }
+
+    private void ShowDeleteDialog(ActivityDto activity)
+    {
+        _activityToDelete = activity;
+        _deleteDialogVisible = true;
+    }
+
+    private void CancelDelete()
+    {
+        _activityToDelete = null;
+        _deleteDialogVisible = false;
+    }
+
+    private async Task ConfirmDelete()
+    {
+        if (_activityToDelete == null) return;
+
+        try
+        {
+            var success = await ApiClient.DeleteActivityAsync(_activityToDelete.Id);
+            if (success)
+            {
+                Snackbar.Add($"Activity '{_activityToDelete.Name}' deleted successfully", Severity.Success);
+                await LoadActivities();
+            }
+            else
+            {
+                Snackbar.Add("Failed to delete activity", Severity.Error);
+            }
+        }
+        catch (Exception ex)
+        {
+            Logger.LogError(ex, "Error deleting activity {ActivityId}", _activityToDelete.Id);
+            Snackbar.Add("Error deleting activity", Severity.Error);
+        }
+        finally
+        {
+            _activityToDelete = null;
+            _deleteDialogVisible = false;
+        }
+    }
+
+    private static string GetPlayerCountText(int? min, int? max)
+    {
+        if (min.HasValue && max.HasValue)
+            return $"{min}-{max}";
+        if (min.HasValue)
+            return $"{min}+";
+        if (max.HasValue)
+            return $"≤{max}";
+        return "Any";
+    }
+}

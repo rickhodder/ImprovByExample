@@ -1,4 +1,5 @@
 using ImprovByExample.Web.Components;
+using ImprovByExample.Web.Services;
 using MudBlazor.Services;
 using Serilog;
 
@@ -37,6 +38,14 @@ builder.Services.AddRazorComponents()
 
 // Add MudBlazor services
 builder.Services.AddMudServices();
+
+// Configure HttpClient for API calls
+var apiBaseUrl = builder.Configuration["ApiSettings:BaseUrl"] ?? "http://localhost:5273";
+builder.Services.AddHttpClient<ApiClient>(client =>
+{
+    client.BaseAddress = new Uri(apiBaseUrl);
+    client.Timeout = TimeSpan.FromSeconds(30);
+});
 
 var app = builder.Build();
 

@@ -3,6 +3,7 @@ using ImprovByExample.Application.Common.Interfaces.Repositories;
 using ImprovByExample.Application.Common.Interfaces.Services;
 using ImprovByExample.Application.Services;
 using ImprovByExample.Infrastructure.Data;
+using ImprovByExample.Infrastructure.Data.Seed;
 using ImprovByExample.Infrastructure.Repositories;
 using ImprovByExample.Domain.Entities;
 using Microsoft.AspNetCore.Identity;
@@ -117,6 +118,20 @@ app.UseAuthentication();
 app.UseAuthorization();
 
 app.MapControllers();
+
+    // Seed database
+    using (var scope = app.Services.CreateScope())
+    {
+        try
+        {
+            await DataSeeder.SeedDataAsync(scope.ServiceProvider);
+            Log.Information("Database seeded successfully");
+        }
+        catch (Exception ex)
+        {
+            Log.Error(ex, "Error seeding database");
+        }
+    }
 
     Log.Information("ImprovByExample.Api started successfully");
     app.Run();

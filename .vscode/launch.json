@@ -1,0 +1,49 @@
+{
+    "version": "0.2.0",
+    "configurations": [
+        {
+            "name": "Debug API",
+            "type": "coreclr",
+            "request": "launch",
+            "preLaunchTask": "build",
+            "program": "${workspaceFolder}/src/ImprovByExample.Api/bin/Debug/net10.0/ImprovByExample.Api.dll",
+            "args": [],
+            "cwd": "${workspaceFolder}/src/ImprovByExample.Api",
+            "stopAtEntry": false,
+            "env": {
+                "ASPNETCORE_ENVIRONMENT": "Development",
+                "ASPNETCORE_URLS": "http://localhost:5273"
+            },
+            "sourceFileMap": {
+                "/Views": "${workspaceFolder}/Views"
+            }
+        },
+        {
+            "name": "Debug Web",
+            "type": "coreclr",
+            "request": "launch",
+            "preLaunchTask": "build",
+            "program": "${workspaceFolder}/src/ImprovByExample.Web/bin/Debug/net10.0/ImprovByExample.Web.dll",
+            "args": [],
+            "cwd": "${workspaceFolder}/src/ImprovByExample.Web",
+            "stopAtEntry": false,
+            "env": {
+                "ASPNETCORE_ENVIRONMENT": "Development",
+                "ASPNETCORE_URLS": "http://localhost:5210"
+            },
+            "sourceFileMap": {
+                "/Views": "${workspaceFolder}/Views"
+            }
+        }
+    ],
+    "compounds": [
+        {
+            "name": "Debug Both (API + Web)",
+            "configurations": [
+                "Debug API",
+                "Debug Web"
+            ],
+            "stopAll": true
+        }
+    ]
+}
