@@ -98,7 +98,6 @@ builder.Services.AddScoped(typeof(IRepository<>), typeof(Repository<>));
 // Add services
 builder.Services.AddScoped<IActivityService, ActivityService>();
 builder.Services.AddScoped<ICurrentUserService, CurrentUserService>();
-builder.Services.AddScoped<ICurrentUserService, CurrentUserService>();
 
 // Add FluentValidation
 builder.Services.AddValidatorsFromAssemblyContaining<IActivityService>();
