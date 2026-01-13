@@ -29,6 +29,10 @@ public static class DataSeeder
         await SeedActivityTypesAsync(context, adminUser.Id);
         await SeedDifficultiesAsync(context, adminUser.Id);
         await SeedRelationshipTypesAsync(context, adminUser.Id);
+        
+        // Save lookup data before seeding data that depends on it
+        await context.SaveChangesAsync();
+        
         await SeedActivitySourcesAsync(context, adminUser.Id);
         
         // Seed Sample Activities
