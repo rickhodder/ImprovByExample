@@ -65,32 +65,28 @@ builder.Services.AddIdentity<ApplicationUser, IdentityRole>(options =>
 .AddEntityFrameworkStores<ImprovDbContext>()
 .AddDefaultTokenProviders();
 
-// Add authentication and authorization
-builder.Services.AddAuthentication(IdentityConstants.ApplicationScheme)
-    .AddIdentityCookies(options =>
+// Configure authentication cookies (AddIdentity already registered authentication)
+builder.Services.ConfigureApplicationCookie(cookieOptions =>
+{
+    cookieOptions.Cookie.Name = ".ImprovByExample.Auth";
+    cookieOptions.Cookie.HttpOnly = true;
+    // Use SameAsRequest for development, Always for production
+    cookieOptions.Cookie.SecurePolicy = builder.Environment.IsDevelopment() 
+        ? CookieSecurePolicy.SameAsRequest 
+        : CookieSecurePolicy.Always;
+    cookieOptions.ExpireTimeSpan = TimeSpan.FromHours(24);
+    cookieOptions.SlidingExpiration = true;
+    cookieOptions.Events.OnRedirectToLogin = context =>
     {
-        options.ApplicationCookie!.Configure(cookieOptions =>
-        {
-            cookieOptions.Cookie.Name = ".ImprovByExample.Auth";
-            cookieOptions.Cookie.HttpOnly = true;
-            // Use SameAsRequest for development, Always for production
-            cookieOptions.Cookie.SecurePolicy = builder.Environment.IsDevelopment() 
-                ? CookieSecurePolicy.SameAsRequest 
-                : CookieSecurePolicy.Always;
-            cookieOptions.ExpireTimeSpan = TimeSpan.FromHours(24);
-            cookieOptions.SlidingExpiration = true;
-            cookieOptions.Events.OnRedirectToLogin = context =>
-            {
-                context.Response.StatusCode = 401;
-                return Task.CompletedTask;
-            };
-            cookieOptions.Events.OnRedirectToAccessDenied = context =>
-            {
-                context.Response.StatusCode = 403;
-                return Task.CompletedTask;
-            };
-        });
-    });
+        context.Response.StatusCode = 401;
+        return Task.CompletedTask;
+    };
+    cookieOptions.Events.OnRedirectToAccessDenied = context =>
+    {
+        context.Response.StatusCode = 403;
+        return Task.CompletedTask;
+    };
+});
 
 builder.Services.AddAuthorization();
 
