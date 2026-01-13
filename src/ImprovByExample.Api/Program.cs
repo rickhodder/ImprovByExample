@@ -5,6 +5,7 @@ using ImprovByExample.Application.Services;
 using ImprovByExample.Infrastructure.Data;
 using ImprovByExample.Infrastructure.Data.Seed;
 using ImprovByExample.Infrastructure.Repositories;
+using ImprovByExample.Infrastructure.Services;
 using ImprovByExample.Domain.Entities;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
@@ -65,7 +66,32 @@ builder.Services.AddIdentity<ApplicationUser, IdentityRole>(options =>
 .AddDefaultTokenProviders();
 
 // Add authentication and authorization
-builder.Services.AddAuthentication();
+builder.Services.AddAuthentication(IdentityConstants.ApplicationScheme)
+    .AddIdentityCookies(options =>
+    {
+        options.ApplicationCookie!.Configure(cookieOptions =>
+        {
+            cookieOptions.Cookie.Name = ".ImprovByExample.Auth";
+            cookieOptions.Cookie.HttpOnly = true;
+            // Use SameAsRequest for development, Always for production
+            cookieOptions.Cookie.SecurePolicy = builder.Environment.IsDevelopment() 
+                ? CookieSecurePolicy.SameAsRequest 
+                : CookieSecurePolicy.Always;
+            cookieOptions.ExpireTimeSpan = TimeSpan.FromHours(24);
+            cookieOptions.SlidingExpiration = true;
+            cookieOptions.Events.OnRedirectToLogin = context =>
+            {
+                context.Response.StatusCode = 401;
+                return Task.CompletedTask;
+            };
+            cookieOptions.Events.OnRedirectToAccessDenied = context =>
+            {
+                context.Response.StatusCode = 403;
+                return Task.CompletedTask;
+            };
+        });
+    });
+
 builder.Services.AddAuthorization();
 
 // Add repositories
@@ -74,6 +100,7 @@ builder.Services.AddScoped(typeof(IRepository<>), typeof(Repository<>));
 
 // Add services
 builder.Services.AddScoped<IActivityService, ActivityService>();
+builder.Services.AddScoped<ICurrentUserService, CurrentUserService>();
 
 // Add FluentValidation
 builder.Services.AddValidatorsFromAssemblyContaining<IActivityService>();

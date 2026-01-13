@@ -1,0 +1,125 @@
+@page "/login"
+@using ImprovByExample.Application.Common.Models.DTOs
+@using ImprovByExample.Web.Services
+@inject IAuthService AuthService
+@inject NavigationManager Navigation
+@inject ISnackbar Snackbar
+@inject ILogger<Login> Logger
+
+<PageTitle>Login - Improv By Example</PageTitle>
+
+<MudContainer MaxWidth="MaxWidth.Small" Class="mt-8">
+    <MudPaper Class="pa-8">
+        <MudText Typo="Typo.h4" GutterBottom="true" Align="Align.Center">
+            Login
+        </MudText>
+        <MudText Typo="Typo.body2" GutterBottom="true" Align="Align.Center" Class="mb-6">
+            Sign in to access your account
+        </MudText>
+
+        <EditForm Model="@_model" OnValidSubmit="HandleLoginAsync">
+            <DataAnnotationsValidator />
+            
+            <MudTextField @bind-Value="_model.Email"
+                          Label="Email"
+                          Variant="Variant.Outlined"
+                          InputType="InputType.Email"
+                          Required="true"
+                          RequiredError="Email is required"
+                          Class="mb-4" />
+
+            <MudTextField @bind-Value="_model.Password"
+                          Label="Password"
+                          Variant="Variant.Outlined"
+                          InputType="InputType.Password"
+                          Required="true"
+                          RequiredError="Password is required"
+                          Class="mb-4" />
+
+            <MudCheckBox @bind-Value="_model.RememberMe" Label="Remember Me" Class="mb-4" />
+
+            @if (_isLoading)
+            {
+                <MudProgressLinear Color="Color.Primary" Indeterminate="true" Class="mb-4" />
+            }
+
+            @if (!string.IsNullOrEmpty(_errorMessage))
+            {
+                <MudAlert Severity="Severity.Error" Class="mb-4">@_errorMessage</MudAlert>
+            }
+
+            <MudButton ButtonType="ButtonType.Submit"
+                       Variant="Variant.Filled"
+                       Color="Color.Primary"
+                       FullWidth="true"
+                       Disabled="_isLoading"
+                       Class="mb-4">
+                @if (_isLoading)
+                {
+                    <MudProgressCircular Size="Size.Small" Indeterminate="true" />
+                    <MudText Class="ml-2">Logging in...</MudText>
+                }
+                else
+                {
+                    <MudText>Login</MudText>
+                }
+            </MudButton>
+        </EditForm>
+
+        <MudDivider Class="my-4" />
+
+        <MudStack Row="true" Justify="Justify.SpaceBetween" AlignItems="AlignItems.Center">
+            <MudLink Href="/forgot-password" Disabled="true">
+                Forgot Password?
+            </MudLink>
+            <MudText Typo="Typo.body2">
+                Don't have an account? 
+                <MudLink Href="/register">Register</MudLink>
+            </MudText>
+        </MudStack>
+    </MudPaper>
+</MudContainer>
+
+@code {
+    private LoginDto _model = new() { Email = "", Password = "" };
+    private bool _isLoading = false;
+    private string? _errorMessage;
+
+    [SupplyParameterFromQuery(Name = "returnUrl")]
+    public string? ReturnUrl { get; set; }
+
+    private async Task HandleLoginAsync()
+    {
+        _isLoading = true;
+        _errorMessage = null;
+        StateHasChanged();
+
+        try
+        {
+            var user = await AuthService.LoginAsync(_model);
+
+            if (user != null)
+            {
+                Snackbar.Add($"Welcome back, {user.Email}!", Severity.Success);
+                
+                // Redirect to return URL or home page
+                var redirectUrl = string.IsNullOrEmpty(ReturnUrl) ? "/" : ReturnUrl;
+                Navigation.NavigateTo(redirectUrl, forceLoad: true);
+            }
+            else
+            {
+                _errorMessage = "Invalid email or password. Please try again.";
+            }
+        }
+        catch (Exception ex)
+        {
+            _errorMessage = "An error occurred during login. Please try again.";
+            Logger.LogError(ex, "Login error for email: {Email}", _model.Email);
+        }
+        finally
+        {
+            _isLoading = false;
+            StateHasChanged();
+        }
+    }
+}

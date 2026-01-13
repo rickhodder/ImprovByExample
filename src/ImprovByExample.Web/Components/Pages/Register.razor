@@ -1,0 +1,143 @@
+@page "/register"
+@using ImprovByExample.Application.Common.Models.DTOs
+@using ImprovByExample.Web.Services
+@inject IAuthService AuthService
+@inject NavigationManager Navigation
+@inject ISnackbar Snackbar
+@inject ILogger<Register> Logger
+
+<PageTitle>Register - Improv By Example</PageTitle>
+
+<MudContainer MaxWidth="MaxWidth.Small" Class="mt-8">
+    <MudPaper Class="pa-8">
+        <MudText Typo="Typo.h4" GutterBottom="true" Align="Align.Center">
+            Create Account
+        </MudText>
+        <MudText Typo="Typo.body2" GutterBottom="true" Align="Align.Center" Class="mb-6">
+            Join Improv By Example today
+        </MudText>
+
+        <EditForm Model="@_model" OnValidSubmit="HandleRegisterAsync">
+            <DataAnnotationsValidator />
+            
+            <MudTextField @bind-Value="_model.Email"
+                          Label="Email"
+                          Variant="Variant.Outlined"
+                          InputType="InputType.Email"
+                          Required="true"
+                          RequiredError="Email is required"
+                          Class="mb-4" />
+
+            <MudGrid Class="mb-4">
+                <MudItem xs="12" sm="6">
+                    <MudTextField @bind-Value="_model.FirstName"
+                                  Label="First Name (Optional)"
+                                  Variant="Variant.Outlined" />
+                </MudItem>
+                <MudItem xs="12" sm="6">
+                    <MudTextField @bind-Value="_model.LastName"
+                                  Label="Last Name (Optional)"
+                                  Variant="Variant.Outlined" />
+                </MudItem>
+            </MudGrid>
+
+            <MudTextField @bind-Value="_model.Password"
+                          Label="Password"
+                          Variant="Variant.Outlined"
+                          InputType="InputType.Password"
+                          Required="true"
+                          RequiredError="Password is required"
+                          HelperText="Must be at least 8 characters with uppercase, lowercase, and digit"
+                          Class="mb-4" />
+
+            <MudTextField @bind-Value="_model.ConfirmPassword"
+                          Label="Confirm Password"
+                          Variant="Variant.Outlined"
+                          InputType="InputType.Password"
+                          Required="true"
+                          RequiredError="Password confirmation is required"
+                          Class="mb-4" />
+
+            @if (_isLoading)
+            {
+                <MudProgressLinear Color="Color.Primary" Indeterminate="true" Class="mb-4" />
+            }
+
+            @if (!string.IsNullOrEmpty(_errorMessage))
+            {
+                <MudAlert Severity="Severity.Error" Class="mb-4">@_errorMessage</MudAlert>
+            }
+
+            <MudButton ButtonType="ButtonType.Submit"
+                       Variant="Variant.Filled"
+                       Color="Color.Primary"
+                       FullWidth="true"
+                       Disabled="_isLoading"
+                       Class="mb-4">
+                @if (_isLoading)
+                {
+                    <MudProgressCircular Size="Size.Small" Indeterminate="true" />
+                    <MudText Class="ml-2">Creating account...</MudText>
+                }
+                else
+                {
+                    <MudText>Create Account</MudText>
+                }
+            </MudButton>
+        </EditForm>
+
+        <MudDivider Class="my-4" />
+
+        <MudText Typo="Typo.body2" Align="Align.Center">
+            Already have an account? 
+            <MudLink Href="/login">Login</MudLink>
+        </MudText>
+    </MudPaper>
+</MudContainer>
+
+@code {
+    private RegisterDto _model = new() 
+    { 
+        Email = "", 
+        Password = "", 
+        ConfirmPassword = "",
+        FirstName = null,
+        LastName = null
+    };
+    private bool _isLoading = false;
+    private string? _errorMessage;
+
+    private async Task HandleRegisterAsync()
+    {
+        _isLoading = true;
+        _errorMessage = null;
+        StateHasChanged();
+
+        try
+        {
+            var user = await AuthService.RegisterAsync(_model);
+
+            if (user != null)
+            {
+                Snackbar.Add($"Account created successfully! Welcome, {user.Email}!", Severity.Success);
+                
+                // Redirect to home page
+                Navigation.NavigateTo("/", forceLoad: true);
+            }
+            else
+            {
+                _errorMessage = "Registration failed. Please check your input and try again.";
+            }
+        }
+        catch (Exception ex)
+        {
+            _errorMessage = "An error occurred during registration. Please try again.";
+            Logger.LogError(ex, "Registration error for email: {Email}", _model.Email);
+        }
+        finally
+        {
+            _isLoading = false;
+            StateHasChanged();
+        }
+    }
+}

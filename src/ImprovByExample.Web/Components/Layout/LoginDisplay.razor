@@ -1,0 +1,84 @@
+@using ImprovByExample.Application.Common.Models.DTOs
+@using ImprovByExample.Web.Services
+@inject IAuthService AuthService
+@inject NavigationManager Navigation
+@inject ISnackbar Snackbar
+@inject ILogger<LoginDisplay> Logger
+
+<MudMenu Icon="@Icons.Material.Filled.AccountCircle" 
+         Color="Color.Inherit" 
+         AnchorOrigin="Origin.BottomRight"
+         TransformOrigin="Origin.TopRight"
+         Dense="true">
+    @if (_currentUser != null)
+    {
+        <MudMenuItem Disabled="true">
+            <MudText Typo="Typo.body2" Class="px-2">
+                <strong>@_currentUser.Email</strong>
+            </MudText>
+            @if (_currentUser.Roles.Contains("Admin"))
+            {
+                <MudChip T="string" Size="Size.Small" Color="Color.Primary" Class="ml-2">Admin</MudChip>
+            }
+        </MudMenuItem>
+        <MudDivider />
+        <MudMenuItem Icon="@Icons.Material.Filled.Person" Disabled="true">
+            Profile (Coming Soon)
+        </MudMenuItem>
+        @if (_currentUser.Roles.Contains("Admin"))
+        {
+            <MudMenuItem Icon="@Icons.Material.Filled.AdminPanelSettings" Href="/admin">
+                Admin Panel
+            </MudMenuItem>
+        }
+        <MudDivider />
+        <MudMenuItem Icon="@Icons.Material.Filled.Logout" OnClick="HandleLogoutAsync">
+            Logout
+        </MudMenuItem>
+    }
+    else
+    {
+        <MudMenuItem Icon="@Icons.Material.Filled.Login" Href="/login">
+            Login
+        </MudMenuItem>
+        <MudMenuItem Icon="@Icons.Material.Filled.PersonAdd" Href="/register">
+            Register
+        </MudMenuItem>
+    }
+</MudMenu>
+
+@code {
+    private UserDto? _currentUser;
+
+    protected override async Task OnInitializedAsync()
+    {
+        await LoadCurrentUserAsync();
+    }
+
+    private async Task LoadCurrentUserAsync()
+    {
+        try
+        {
+            _currentUser = await AuthService.GetCurrentUserAsync();
+        }
+        catch (Exception ex)
+        {
+            Logger.LogError(ex, "Error loading current user");
+            _currentUser = null;
+        }
+    }
+
+    private async Task HandleLogoutAsync()
+    {
+        var success = await AuthService.LogoutAsync();
+        if (success)
+        {
+            Snackbar.Add("Logged out successfully", Severity.Success);
+            Navigation.NavigateTo("/", forceLoad: true);
+        }
+        else
+        {
+            Snackbar.Add("Error during logout", Severity.Error);
+        }
+    }
+}
