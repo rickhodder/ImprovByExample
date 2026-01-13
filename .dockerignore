@@ -1,0 +1,48 @@
+# Ignore git files
+.git
+.gitignore
+.gitattributes
+
+# Ignore build output
+**/bin/
+**/obj/
+**/out/
+
+# Ignore test results
+**/TestResults/
+**/*.trx
+**/*.coverage
+
+# Ignore logs
+**/logs/
+*.log
+
+# Ignore IDE files
+.vs/
+.vscode/
+.idea/
+*.suo
+*.user
+*.userosscache
+*.sln.docstates
+
+# Ignore package restore
+**/packages/
+**/node_modules/
+
+# Ignore documentation
+*.md
+docs/
+PHASE*_SUMMARY.md
+
+# Ignore Docker files in subdirectories
+**/.dockerignore
+**/Dockerfile
+
+# Ignore GitHub files
+.github/
+
+# Ignore temporary files
+**/tmp/
+**/.DS_Store
+**/Thumbs.db
