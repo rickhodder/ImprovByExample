@@ -6,6 +6,10 @@ on:
   pull_request:
     branches: [ main, develop ]
 
+# Set minimal permissions for GITHUB_TOKEN
+permissions:
+  contents: read
+
 env:
   DOTNET_VERSION: '10.0.x'
   
@@ -14,6 +18,9 @@ jobs:
   build-and-test:
     name: Build and Test
     runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      checks: write  # For uploading test results
     
     steps:
     - name: Checkout code
@@ -46,6 +53,9 @@ jobs:
     runs-on: ubuntu-latest
     needs: build-and-test
     if: github.event_name == 'push'
+    permissions:
+      contents: read
+      packages: write  # For pushing to container registry (when enabled)
     
     steps:
     - name: Checkout code
@@ -79,6 +89,9 @@ jobs:
     name: Integration Tests
     runs-on: ubuntu-latest
     needs: build-and-test
+    permissions:
+      contents: read
+      checks: write  # For uploading test results
     
     services:
       postgres:
