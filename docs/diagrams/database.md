@@ -49,7 +49,7 @@ erDiagram
         int DurationMinutes
         int ActivityTypeId FK
         int DifficultyId FK
-        int? ActivitySourceId FK
+        int ActivitySourceId FK "nullable"
         string CreatedBy FK
         datetime CreatedAt
         string LastModifiedBy FK
@@ -79,7 +79,7 @@ erDiagram
         int SourceTypeId FK
         string Url
         string AffiliateLink
-        int? PublicationYear
+        int PublicationYear "nullable"
         string CreatedBy FK
         datetime CreatedAt
     }
@@ -106,7 +106,7 @@ erDiagram
         int ActivityId FK
         string Title
         string Url
-        int? VideoPlatformId FK
+        int VideoPlatformId FK "nullable"
         string Description
         string CreatedBy FK
         datetime CreatedAt
