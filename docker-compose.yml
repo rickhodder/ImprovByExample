@@ -1,0 +1,73 @@
+services:
+  # PostgreSQL Database
+  postgres:
+    image: postgres:16-alpine
+    container_name: improvbyexample-postgres
+    environment:
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: postgres
+      POSTGRES_DB: improvbyexample
+    ports:
+      - "5432:5432"
+    volumes:
+      - postgres-data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U postgres"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    networks:
+      - improvbyexample-network
+
+  # API Service
+  api:
+    build:
+      context: .
+      dockerfile: src/ImprovByExample.Api/Dockerfile
+    container_name: improvbyexample-api
+    environment:
+      - ASPNETCORE_ENVIRONMENT=Development
+      - ConnectionStrings__PostgreSQL=Host=postgres;Port=5432;Database=improvbyexample;Username=postgres;Password=postgres
+      - ASPNETCORE_URLS=http://+:8080
+    ports:
+      - "5273:8080"
+    depends_on:
+      postgres:
+        condition: service_healthy
+    networks:
+      - improvbyexample-network
+    restart: unless-stopped
+    volumes:
+      - api-logs:/app/logs
+
+  # Web Service
+  web:
+    build:
+      context: .
+      dockerfile: src/ImprovByExample.Web/Dockerfile
+    container_name: improvbyexample-web
+    environment:
+      - ASPNETCORE_ENVIRONMENT=Development
+      - ApiSettings__BaseUrl=http://api:8080
+      - ASPNETCORE_URLS=http://+:8080
+    ports:
+      - "5042:8080"
+    depends_on:
+      - api
+    networks:
+      - improvbyexample-network
+    restart: unless-stopped
+    volumes:
+      - web-logs:/app/logs
+
+volumes:
+  postgres-data:
+    driver: local
+  api-logs:
+    driver: local
+  web-logs:
+    driver: local
+
+networks:
+  improvbyexample-network:
+    driver: bridge
